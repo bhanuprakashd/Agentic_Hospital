@@ -331,7 +331,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
           The Future of<br><span class="grad-text">AI-Powered Medicine</span><br>is Already Here
         </h1>
         <p class="hero-sub">
-          <strong>Agentic Hospital</strong> is a fully autonomous AI healthcare system — a root coordinator intelligently triages patients and routes them to <strong>35 specialist AI agents</strong>, each equipped with domain-specific clinical tools.
+          <strong>Agentic Hospital</strong> is a fully autonomous AI healthcare system — a root coordinator intelligently triages patients and routes them to <strong>40 specialist AI agents</strong>, including triage, pharmacy, and discharge planning agents, each equipped with domain-specific clinical tools.
         </p>
         <div class="hero-actions">
           <a href="#demo" class="btn btn-primary btn-lg">
@@ -451,7 +451,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
         <div class="flow-num">STEP 03</div>
         <div class="flow-icon">🔀</div>
         <div class="flow-title">Smart Routing</div>
-        <div class="flow-body">The coordinator agent selects the optimal specialist agent from 35 departments, performs context-preserving handoff with full patient state.</div>
+        <div class="flow-body">The coordinator agent selects the optimal specialist agent from 40 agents (35 departments + triage + pharmacy + discharge), performs context-preserving handoff with full patient state.</div>
       </div>
       <div class="flow-card reveal reveal-delay-3">
         <div class="flow-num">STEP 04</div>
@@ -493,16 +493,16 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
 <section id="departments" class="dept-section">
   <div class="wrap">
     <div class="section-head reveal">
-      <div class="section-label">35 Specialist Departments</div>
+      <div class="section-label">40 Specialist Agents</div>
       <h2 class="section-title">Every major medical specialty,<br>AI-powered and ready</h2>
       <p class="section-sub">Each department agent has its own persona, specialty tools, evidence-based protocols, and clinical reasoning framework.</p>
     </div>
     <div class="dept-filter reveal">
-      <button class="filter-btn active" onclick="filterDepts('all', this)">All (35)</button>
+      <button class="filter-btn active" onclick="filterDepts('all', this)">All (40)</button>
       <button class="filter-btn" onclick="filterDepts('core', this)">Core Medicine</button>
       <button class="filter-btn" onclick="filterDepts('surgical', this)">Surgical</button>
       <button class="filter-btn" onclick="filterDepts('diagnostic', this)">Diagnostic</button>
-      <button class="filter-btn" onclick="filterDepts('support', this)">Support</button>
+      <button class="filter-btn" onclick="filterDepts('support', this)">Operations</button>
     </div>
     <div class="dept-grid" id="dept-grid"></div>
   </div>
@@ -653,6 +653,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
         <div class="arch-connector"></div>
         <div class="arch-row" id="arch-dept-row"></div>
         <div class="arch-tools">
+          <!-- Core Tools -->
           <div class="arch-tool">triage_assessment()</div>
           <div class="arch-tool">analyze_medical_image()</div>
           <div class="arch-tool">web_search()</div>
@@ -663,6 +664,24 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
           <div class="arch-tool">generate_soap_note()</div>
           <div class="arch-tool">calculate_medication_dose()</div>
           <div class="arch-tool">schedule_appointment()</div>
+          <!-- Sprint 1: Triage -->
+          <div class="arch-tool" style="background:var(--green)">calculate_esi_score()</div>
+          <div class="arch-tool" style="background:var(--green)">record_nurse_triage()</div>
+          <div class="arch-tool" style="background:var(--green)">assign_waiting_priority()</div>
+          <!-- Sprint 2: Pharmacy -->
+          <div class="arch-tool" style="background:var(--purple)">verify_medication_order()</div>
+          <div class="arch-tool" style="background:var(--purple)">dispense_medication()</div>
+          <div class="arch-tool" style="background:var(--purple)">medication_reconciliation()</div>
+          <div class="arch-tool" style="background:var(--purple)">generate_tta_prescription()</div>
+          <!-- Sprint 3: Discharge -->
+          <div class="arch-tool" style="background:var(--cyan)">check_discharge_criteria()</div>
+          <div class="arch-tool" style="background:var(--cyan)">generate_discharge_summary()</div>
+          <div class="arch-tool" style="background:var(--cyan)">send_gp_letter()</div>
+          <div class="arch-tool" style="background:var(--cyan)">arrange_community_services()</div>
+          <!-- Sprint 4: Diagnostic -->
+          <div class="arch-tool" style="background:var(--amber)">order_investigation()</div>
+          <div class="arch-tool" style="background:var(--amber)">get_pending_results()</div>
+          <div class="arch-tool" style="background:var(--amber)">acknowledge_critical_result()</div>
         </div>
       </div>
     </div>
@@ -715,7 +734,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
       <h2 class="cta-title">
         Deploy an AI hospital<br>for your <span class="grad-text">patients today</span>
       </h2>
-      <p class="cta-sub">From triage to follow-up — give every patient a guided, structured AI experience backed by 35 specialist agents and real-time clinical guidelines.</p>
+      <p class="cta-sub">From triage to discharge — give every patient a guided, structured AI experience backed by 40 specialist agents and real-time clinical guidelines.</p>
       <div class="cta-actions" id="demo">
         <a href="mailto:hello@agentichospital.ai?subject=Demo%20Request" class="btn btn-primary btn-lg">
           <span>📬</span> Schedule a Demo
@@ -740,7 +759,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
           <div class="logo-mark">⚕</div>
           <span style="font-weight:700;font-size:15px" class="logo-text">Agentic Hospital</span>
         </div>
-        <p class="footer-desc">An AI-powered multi-agent healthcare system orchestrating 35 specialist agents for intelligent triage, clinical decision support, and patient education.</p>
+        <p class="footer-desc">An AI-powered multi-agent healthcare system orchestrating 40 specialist agents for intelligent triage, clinical decision support, medication management, and patient discharge.</p>
         <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
           <span class="footer-badge">🤖 Google ADK</span>
           <span class="footer-badge">✨ Gemini 2.0 Flash</span>
@@ -765,7 +784,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
           <a href="#departments">Oncology</a>
           <a href="#departments">Emergency Medicine</a>
           <a href="#departments">Critical Care</a>
-          <a href="#departments">All 35 departments →</a>
+          <a href="#departments">All 40 agents →</a>
         </div>
       </div>
       <div>
@@ -829,6 +848,11 @@ const DEPTS = [
   {name:"Nuclear Medicine",icon:"☢️",badge:"diagnostic",desc:"PET/CT, bone scan, thyroid uptake, SPECT, radioiodine therapy planning.",tags:["PET/CT","SPECT","I-131","Bone scan"]},
   {name:"Physical Medicine & Rehab",icon:"🏃",badge:"support",desc:"Stroke rehab, SCI, chronic pain, EMG/NCS, prosthetics, functional restoration.",tags:["EMG","Rehab","SCI","Prosthetics"]},
   {name:"Radiation Oncology",icon:"⚡",badge:"support",desc:"Radiation therapy planning: IMRT, SBRT, SRS, brachytherapy, palliative RT.",tags:["IMRT","SBRT","SRS","DVH"]},
+  // Operations (Sprints 1-3)
+  {name:"Triage Nurse",icon:"🏥",badge:"operations",desc:"ESI v4 triage scoring, vital signs, waiting queue management, patient prioritization.",tags:["ESI","Vitals","Queue","Triage"]},
+  {name:"Pharmacy",icon:"💊",badge:"operations",desc:"Medication verification, dispensing, reconciliation, TTA prescriptions, formulary checks.",tags:["Verify","Dispense","Reconcile","TTA"]},
+  {name:"Discharge Planning",icon:"📋",badge:"operations",desc:"Discharge readiness, summaries, GP letters, community referrals, care coordination.",tags:["Summary","GP Letter","Community","Discharge"]},
+  {name:"Hospital Admission",icon:"🛏️",badge:"operations",desc:"Bed management, admissions, transfers, waitlists, ward visualization.",tags:["Beds","Admission","Transfer","Waitlist"]},
 ];
 
 // ── BADGE COLORS ──
@@ -837,6 +861,7 @@ const BADGE_COLORS = {
   surgical:{icon_bg:"linear-gradient(135deg,rgba(255,71,87,0.12),rgba(255,100,100,0.08))",icon_border:"rgba(255,71,87,0.25)"},
   diagnostic:{icon_bg:"linear-gradient(135deg,rgba(255,179,0,0.12),rgba(255,213,0,0.08))",icon_border:"rgba(255,179,0,0.25)"},
   support:{icon_bg:"linear-gradient(135deg,rgba(124,58,237,0.15),rgba(168,85,247,0.1))",icon_border:"rgba(124,58,237,0.25)"},
+  operations:{icon_bg:"linear-gradient(135deg,rgba(22,163,74,0.15),rgba(34,197,94,0.1))",icon_border:"rgba(22,163,74,0.25)"},
 };
 
 // ── RENDER DEPARTMENTS ──
@@ -852,7 +877,7 @@ function renderDepts(filter = 'all') {
     el.innerHTML = `
       <div class="dept-card-top">
         <div class="dept-icon-wrap" style="background:${bc.icon_bg};border:1px solid ${bc.icon_border}">${d.icon}</div>
-        <span class="dept-badge ${d.badge}">${d.badge === 'core' ? 'Medicine' : d.badge === 'surgical' ? 'Surgical' : d.badge === 'diagnostic' ? 'Diagnostic' : 'Support'}</span>
+        <span class="dept-badge ${d.badge}">${d.badge === 'core' ? 'Medicine' : d.badge === 'surgical' ? 'Surgical' : d.badge === 'diagnostic' ? 'Diagnostic' : d.badge === 'operations' ? 'Operations' : 'Support'}</span>
       </div>
       <div class="dept-name">${d.name}</div>
       <div class="dept-desc">${d.desc}</div>
@@ -895,7 +920,7 @@ function renderAgentList() {
   more.className = 't-agent';
   more.style.background = 'rgba(0,212,255,0.1)';
   more.style.color = 'var(--cyan)';
-  more.textContent = '+23 more…';
+  more.textContent = '+28 more…';
   el.appendChild(more);
 }
 
