@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sentinel in Healthcare AI – Agentic Healthcare Hospital</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sentinel is a hyper-advanced agentic Healthcare AI that orchestrates a full virtual hospital of specialist agents for safe triage, education, and care coordination.">
+  <style>
+    :root {
+      --bg: #050814;
+      --bg-alt: #0b1020;
+      --card: #0f172a;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56,189,248,0.2);
+      --accent-strong: #0ea5e9;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --danger: #f97373;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 24px 60px rgba(0,0,0,0.45);
+      --max-width: 1100px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #111827 0, #020617 40%, #000 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(to bottom, rgba(2,6,23,0.9), rgba(2,6,23,0.65), transparent);
+      border-bottom: 1px solid rgba(15,23,42,0.8);
+    }
+
+    .nav-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .brand-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #38bdf8 0, #0ea5e9 24%, #0f172a 60%);
+      box-shadow: 0 0 30px rgba(56,189,248,0.55);
+      position: relative;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: inherit;
+      background: radial-gradient(circle at 30% 20%, #e5e7eb 0, #0f172a 70%);
+      opacity: 0.9;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 13px;
+      padding: 8px 16px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease-out;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-outline {
+      border-color: rgba(148,163,184,0.55);
+      color: var(--muted);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(15,23,42,0.9);
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+      border-color: transparent;
+      color: #0b1120;
+      font-weight: 600;
+      box-shadow: 0 14px 40px rgba(56,189,248,0.45);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    main {
+      flex: 1;
+    }
+
+    .section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 32px 20px 24px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+      gap: 32px;
+      padding-top: 56px;
+      padding-bottom: 36px;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+        padding-top: 32px;
+      }
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+      padding: 4px 10px 4px 4px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.12), transparent 60%);
+    }
+
+    .pill-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #22c55e 0, #166534 70%);
+      box-shadow: 0 0 12px rgba(34,197,94,0.7);
+    }
+
+    .hero-title {
+      font-size: clamp(32px, 4vw, 40px);
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      margin: 0 0 16px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(120deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 440px;
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .hero-footnote {
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 420px;
+    }
+
+    .hero-right-card {
+      border-radius: 26px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.2), rgba(15,23,42,0.96) 42%, #020617 100%);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 16px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-right-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.8);
+    }
+
+    .hero-grid {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 10px;
+    }
+
+    .mini-card {
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 10px 10px 9px;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), #020617 80%);
+      font-size: 11px;
+    }
+
+    .mini-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .pill-chip {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 3px 8px;
+      font-size: 10px;
+      color: var(--muted);
+      background: rgba(15,23,42,0.9);
+    }
+
+    .pill-chip.critical {
+      border-color: rgba(239,68,68,0.8);
+      color: #fecaca;
+      background: rgba(127,29,29,0.8);
+    }
+
+    .pill-chip.safe {
+      border-color: rgba(34,197,94,0.7);
+      color: #bbf7d0;
+      background: rgba(22,101,52,0.9);
+    }
+
+    .mini-json {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 10px;
+      line-height: 1.6;
+      color: #e5e7eb;
+      white-space: pre;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.9), #020617);
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(15,23,42,0.8);
+    }
+
+    .section-head {
+      margin-top: 10px;
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .section-sub {
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 620px;
+      margin-bottom: 18px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .features-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+    @media (max-width: 650px) {
+      .features-grid {
+        grid-template-columns: minmax(0,1fr);
+      }
+    }
+
+    .feature-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148,163,184,0.3);
+      background: linear-gradient(145deg, var(--bg-alt), #020617);
+      padding: 14px 13px;
+      font-size: 12px;
+    }
+
+    .feature-title {
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .feature-body {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .depts {
+      display: grid;
+      grid-template-columns: 1.4fr 1.2fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .depts {
+        grid-template-columns: minmax(0,1fr);
+      }
+    }
+
+    .dept-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .dept-pill {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 4px 9px;
+      color: var(--muted);
+      background: rgba(15,23,42,0.85);
+    }
+
+    .dept-pill.primary {
+      border-color: rgba(56,189,248,0.9);
+      color: #e0f2fe;
+      background: rgba(8,47,73,0.95);
+    }
+
+    .compliance-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148,163,184,0.35);
+      padding: 14px 13px;
+      background: radial-gradient(circle at top left, rgba(15,23,42,0.96), #020617);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .compliance-card strong {
+      color: var(--text);
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 30px 20px 34px;
+      border-top: 1px solid rgba(15,23,42,0.9);
+    }
+
+    .cta-title {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .cta-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    footer {
+      font-size: 10px;
+      color: var(--muted);
+      border-top: 1px solid rgba(15,23,42,0.9);
+      padding: 10px 20px 16px;
+      background: #020617;
+    }
+
+    footer .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <span>Agentic Healthcare Hospital</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#specialties">Specialties</a>
+        <a href="#compliance">Compliance</a>
+      </nav>
+      <div class="nav-cta">
+        <a href="#demo" class="btn btn-outline">View demo</a>
+        <a href="#contact" class="btn btn-primary">Talk to our team</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section hero">
+      <div>
+        <div class="pill">
+          <div class="pill-dot"></div>
+          <span>Sentinel in Healthcare AI · Agentic Hospital OS</span>
+        </div>
+        <h1 class="hero-title">
+          The <span>Sentinel</span> of Healthcare AI
+        </h1>
+        <p class="hero-sub">
+          A hyper-advanced, agentic Healthcare AI that orchestrates a full virtual hospital of specialist agents to triage, guide,
+          and educate patients safely — across every major department, 24/7.[web:77]
+        </p>
+        <div class="hero-cta-row">
+          <a id="demo" href="#contact" class="btn btn-primary">Experience the Agentic Hospital</a>
+          <a href="#how-it-works" class="btn btn-outline">See how it works</a>
+        </div>
+        <p class="hero-footnote">
+          Sentinel is an AI assistant for educational and informational support only. It does not diagnose, treat, or prescribe
+          and is designed to augment, not replace, licensed clinicians.[web:55]
+        </p>
+      </div>
+
+      <div class="hero-right-card" aria-hidden="true">
+        <div class="hero-right-header">
+          <div class="hero-badge">
+            <span style="width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 12px rgba(34,197,94,.8);"></span>
+            Live triage session
+          </div>
+          <span>Multi-agent orchestration</span>
+        </div>
+        <div class="hero-grid">
+          <div class="mini-card">
+            <div class="mini-title">Coordinator · Sentinel</div>
+            <div class="pill-list" style="margin-bottom:8px;">
+              <span class="pill-chip critical">Chest pain · acuity 2</span>
+              <span class="pill-chip">Route → cardiology_agent</span>
+              <span class="pill-chip safe">Emergency education sent</span>
+            </div>
+            <div class="mini-json">
+{`{
+  "triage": {
+    "acuity_1_to_5": 2,
+    "reason": "Exertional chest pain with dyspnea"
+  },
+  "handoff": {
+    "department": "Cardiology",
+    "agent": "cardiology_agent"
+  }
+}`}
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-title">Specialties online</div>
+            <div class="pill-list">
+              <span class="pill-chip">Cardiology</span>
+              <span class="pill-chip">Neurology</span>
+              <span class="pill-chip">Oncology</span>
+              <span class="pill-chip">Pediatrics</span>
+              <span class="pill-chip">Psychiatry</span>
+              <span class="pill-chip">Family Medicine</span>
+              <span class="pill-chip">Critical Care</span>
+              <span class="pill-chip">Radiology</span>
+              <span class="pill-chip">More…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="section">
+      <h2 class="section-head">One AI brain, a whole digital hospital</h2>
+      <p class="section-sub">
+        Sentinel coordinates a network of specialist agents — mirroring global medical departments — to deliver structured,
+        explainable guidance and triage while keeping clinicians in control at every step.[web:42][web:23]
+      </p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-title">Intelligent triage</div>
+          <div class="feature-body">
+            Uses a 5‑level acuity framework inspired by modern emergency severity indexes to identify red flags, suggest urgency,
+            and route patients to the right specialty in seconds.[web:60][web:63]
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Specialist-grade coverage</div>
+          <div class="feature-body">
+            Mirrors recognized medical specialties: Cardiology, Neurology, Oncology, Pediatrics, Psychiatry, Family Medicine,
+            Emergency Medicine, Critical Care, Orthopedics, Dermatology, and more.[web:42][web:23]
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Structured, explainable output</div>
+          <div class="feature-body">
+            Every interaction yields a structured JSON care summary: symptom story, educational differentials, must-not-miss
+            conditions, next steps, and red-flag education — ready for integration.[web:77]
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Agentic orchestration</div>
+          <div class="feature-body">
+            A coordinator agent works with department agents to handle multi-system problems, handing off cases across cardiology,
+            nephrology, and critical care without losing context.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Safety-first behavior</div>
+          <div class="feature-body">
+            Enforces strict AI disclaimers, avoids prescribing doses, surfaces uncertainty explicitly, and consistently advises
+            in-person care and local emergency services when risk is high.[web:55][web:76]
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Integration-ready</div>
+          <div class="feature-body">
+            Exposes everything through an API for websites, apps, call centers, or EHR portals with auditability, role-based
+            access control, and institution-specific guardrails.[web:77]
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="specialties" class="section">
+      <h2 class="section-head">Global specialty coverage, out of the box</h2>
+      <p class="section-sub">
+        Sentinel’s agent grid maps to globally recognized hospital departments so your digital front door speaks the same
+        language as your clinical teams.[web:42]
+      </p>
+      <div class="depts">
+        <div>
+          <div class="dept-list">
+            <span class="dept-pill primary">Family Medicine / General Practice</span>
+            <span class="dept-pill primary">Internal Medicine</span>
+            <span class="dept-pill primary">Emergency Medicine</span>
+            <span class="dept-pill primary">Critical Care Medicine</span>
+            <span class="dept-pill primary">Pediatrics</span>
+            <span class="dept-pill primary">Obstetrics &amp; Gynecology</span>
+            <span class="dept-pill primary">Psychiatry</span>
+            <span class="dept-pill primary">Cardiology</span>
+            <span class="dept-pill primary">Neurology</span>
+            <span class="dept-pill primary">Oncology</span>
+            <span class="dept-pill">Dermatology</span>
+            <span class="dept-pill">Orthopedic Surgery</span>
+            <span class="dept-pill">ENT / Otolaryngology</span>
+            <span class="dept-pill">Gastroenterology</span>
+            <span class="dept-pill">Pulmonology / Respiratory</span>
+            <span class="dept-pill">Nephrology</span>
+            <span class="dept-pill">Endocrinology</span>
+            <span class="dept-pill">Hematology</span>
+            <span class="dept-pill">Infectious Diseases</span>
+            <span class="dept-pill">Rheumatology</span>
+            <span class="dept-pill">Allergy &amp; Immunology</span>
+            <span class="dept-pill">General Surgery</span>
+            <span class="dept-pill">Cardiothoracic Surgery</span>
+            <span class="dept-pill">Colorectal Surgery</span>
+            <span class="dept-pill">Neurosurgery</span>
+            <span class="dept-pill">Vascular Surgery</span>
+            <span class="dept-pill">Urology</span>
+            <span class="dept-pill">Plastic Surgery</span>
+            <span class="dept-pill">Thoracic Surgery</span>
+            <span class="dept-pill">Physical Medicine &amp; Rehab</span>
+            <span class="dept-pill">Radiology / Diagnostic</span>
+            <span class="dept-pill">Radiation Oncology</span>
+            <span class="dept-pill">Nuclear Medicine</span>
+            <span class="dept-pill">Pathology</span>
+          </div>
+        </div>
+        <div class="compliance-card" id="compliance">
+          <p><strong>Built to support clinicians, not replace them</strong></p>
+          <p>
+            Sentinel is designed in line with emerging guidance on safe health chatbots: clear AI identity, non‑clinician
+            disclaimers, emergency escalation language, and explicit instructions to consult licensed professionals for
+            decisions, diagnosis, and treatment.[web:55][web:76]
+          </p>
+          <p>
+            Messaging and configuration can be tuned for your jurisdiction and governance requirements while preserving strict
+            safety behavior by default.[web:73][web:79]
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="cta-section">
+      <h2 class="cta-title">Bring an agentic hospital to your patients</h2>
+      <p class="cta-sub">
+        Deploy Sentinel as your hospital’s digital front door — web, mobile, or call center — and give every patient a guided,
+        structured AI experience that keeps clinicians in control.
+      </p>
+      <div class="hero-cta-row" style="justify-content:center;">
+        <a href="mailto:hello@example.com?subject=Sentinel%20Agentic%20Hospital%20Demo" class="btn btn-primary">
+          Schedule a technical demo
+        </a>
+        <a href="#" class="btn btn-outline">
+          Download architecture overview
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span>© 2026 Agentic Healthcare Hospital · Sentinel in Healthcare AI</span>
+      <span>
+        Disclaimer: Sentinel is an AI system for educational and informational purposes only and does not provide medical advice,
+        diagnosis, or treatment. Always consult a licensed healthcare professional for medical decisions.[web:55]
+      </span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

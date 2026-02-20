@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic Hospital — Architecture Diagram</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --medical: #1f6feb;
+    --surgical: #238636;
+    --diagnostic: #9333ea;
+    --emergency: #da3633;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .header-icon { font-size: 48px; }
+  .header-text h1 { font-size: 26px; font-weight: 700; color: var(--accent); }
+  .header-text p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .badge-blue { background: #1f6feb33; color: #58a6ff; border: 1px solid #1f6feb66; }
+  .badge-green { background: #23863633; color: #3fb950; border: 1px solid #23863666; }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .stat {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* ── Main layout ── */
+  main { padding: 32px 40px; max-width: 1600px; margin: 0 auto; }
+
+  /* ── Section headers ── */
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Root agent card ── */
+  .root-agent {
+    background: linear-gradient(135deg, #1f6feb22, #161b22);
+    border: 1px solid #1f6feb66;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .root-agent::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #1f6feb, #58a6ff, #1f6feb);
+  }
+  .root-agent-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .root-agent-icon {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .root-agent-name { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .root-agent-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .root-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .tool-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid;
+  }
+  .chip-common { background: #1f6feb1a; color: #58a6ff; border-color: #1f6feb44; }
+  .chip-specialty { background: #23863619; color: #3fb950; border-color: #23863644; }
+  .chip-image { background: #9333ea1a; color: #d2a8ff; border-color: #9333ea44; }
+  .chip-web { background: #f786661a; color: #f78666; border-color: #f7866644; }
+
+  /* ── Arrow connector ── */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 4px 0;
+    color: var(--text-muted);
+    font-size: 20px;
+    line-height: 1;
+  }
+  .connector-line {
+    width: 2px;
+    height: 24px;
+    background: linear-gradient(to bottom, #1f6feb66, #30363d);
+  }
+
+  /* ── Category row ── */
+  .category-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .cat-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Department grid ── */
+  .dept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  /* ── Department card ── */
+  .dept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .dept-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    border-radius: 10px 0 0 10px;
+  }
+  .dept-card.medical::before { background: var(--medical); }
+  .dept-card.surgical::before { background: var(--surgical); }
+  .dept-card.diagnostic::before { background: var(--diagnostic); }
+  .dept-card.emergency::before { background: var(--emergency); }
+
+  .dept-card:hover {
+    border-color: #58a6ff66;
+    background: var(--surface2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .dept-card.active {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .dept-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .dept-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .dept-agent-id {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'Consolas', monospace;
+    margin-top: 2px;
+  }
+  .dept-icons {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .icon-badge {
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  .dept-tools-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  /* expanded detail */
+  .dept-detail {
+    display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .dept-card.active .dept-detail { display: block; }
+  .detail-section { margin-bottom: 10px; }
+  .detail-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  .detail-tools { display: flex; flex-wrap: wrap; gap: 4px; }
+  .desc-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .legend-section h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Flow diagram ── */
+  .flow-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+  .flow-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .flow-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    min-width: 900px;
+  }
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-width: 140px;
+    text-align: center;
+    font-size: 12px;
+  }
+  .flow-node.root-node {
+    background: linear-gradient(135deg, #1f6feb22, #0d1117);
+    border-color: #1f6feb66;
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 180px;
+  }
+  .flow-node.tool-node {
+    background: #23863611;
+    border-color: #23863644;
+    color: #3fb950;
+    min-width: 120px;
+    font-size: 11px;
+  }
+  .flow-node.dept-node {
+    background: #1f6feb11;
+    border-color: #1f6feb33;
+    color: var(--accent);
+    min-width: 120px;
+    font-size: 11px;
+  }
+  .flow-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    padding: 0 6px;
+    font-size: 16px;
+    align-self: center;
+  }
+  .flow-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+  }
+  .flow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .flow-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-self: center;
+  }
+
+  /* ── Common tools section ── */
+  .common-tools-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+  .common-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .common-tool-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Consolas', monospace;
+    color: var(--text-muted);
+  }
+  .common-tool-item span { color: var(--accent); }
+
+  /* ── Search / filter ── */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-muted); }
+  .filter-btn {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active-filter {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── Expand all ── */
+  .expand-all-btn {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .expand-all-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Model badge ── */
+  .model-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #9333ea22;
+    border: 1px solid #9333ea44;
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--accent4);
+    font-family: 'Consolas', monospace;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    main { padding: 20px; }
+    header { padding: 20px; }
+    .dept-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="header-icon">🏥</div>
+  <div class="header-text">
+    <h1>Agentic Hospital — Architecture Diagram</h1>
+    <p>
+      <span class="badge badge-blue">Google ADK</span>
+      <span class="badge badge-green">Gemini 2.5 Flash Lite</span>
+      Interactive system map — click any department card to expand tools
+    </p>
+  </div>
+</header>
+
+<!-- ── Stats Bar ── -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">35</div><div class="stat-label">Departments</div></div>
+  <div class="stat"><div class="stat-value">36</div><div class="stat-label">Agents total</div></div>
+  <div class="stat"><div class="stat-value">7</div><div class="stat-label">Common tools</div></div>
+  <div class="stat"><div class="stat-value">70</div><div class="stat-label">Specialty tools</div></div>
+  <div class="stat"><div class="stat-value">11</div><div class="stat-label">Image-capable</div></div>
+  <div class="stat"><div class="stat-value">10</div><div class="stat-label">Mock patients</div></div>
+  <div class="stat"><div class="stat-value">143+</div><div class="stat-label">Drug interactions</div></div>
+</div>
+
+<main>
+
+  <!-- ── Flow Diagram ── -->
+  <div class="flow-wrap">
+    <div class="flow-title">Request Flow</div>
+    <div class="flow-row">
+      <div class="flow-col">
+        <div class="flow-node" style="background:#0d111700;border:none;font-size:12px;color:var(--text-muted);">👤 Patient</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div class="flow-node root-node">🏥 hospital_coordinator<br><small style="font-weight:400;color:var(--text-muted);">root_agent</small></div>
+        <div class="flow-label" style="font-size:10px;color:var(--accent4)">gemini-2.5-flash-lite</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;">Coordinator tools</div>
+        <div class="flow-group">
+          <div class="flow-node tool-node">triage_assessment</div>
+          <div class="flow-node tool-node">analyze_medical_image</div>
+          <div class="flow-node tool-node">web_search</div>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;">Routes to</div>
+        <div class="flow-group">
+          <div class="flow-node dept-node">🫀 cardiology_agent</div>
+          <div class="flow-node dept-node">🧠 neurology_agent</div>
+          <div class="flow-node dept-node">🫁 pulmonology_agent</div>
+          <div class="flow-node" style="background:transparent;border:1px dashed #30363d;color:var(--text-muted);font-size:11px;text-align:center;padding:8px 14px;">… 32 more agents</div>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-col">
+        <div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:6px;">Each agent uses</div>
+        <div class="flow-group">
+          <div class="flow-node tool-node" style="background:#1f6feb11;border-color:#1f6feb33;color:#58a6ff;">7 common tools</div>
+          <div class="flow-node tool-node">2 specialty tools</div>
+          <div class="flow-node tool-node" style="background:#9333ea11;border-color:#9333ea33;color:#d2a8ff;">web_search</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Common Tools ── -->
+  <div class="common-tools-box">
+    <div class="section-title">Common Tools — available to every department agent</div>
+    <div class="common-tools-grid">
+      <div class="common-tool-item">🔵 <span>get_patient_info</span></div>
+      <div class="common-tool-item">🔵 <span>record_vitals</span></div>
+      <div class="common-tool-item">🔵 <span>check_drug_interactions</span></div>
+      <div class="common-tool-item">🔵 <span>schedule_appointment</span></div>
+      <div class="common-tool-item">🔵 <span>get_lab_results</span></div>
+      <div class="common-tool-item">🔵 <span>generate_soap_note</span></div>
+      <div class="common-tool-item">🔵 <span>calculate_medication_dose</span></div>
+      <div class="common-tool-item" style="border-color:#f7866644;">🔴 <span style="color:#f78666;">web_search</span></div>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--text-muted);">
+      + <span style="color:var(--accent4)">analyze_medical_image</span> — available to 11 imaging-capable departments &nbsp;|&nbsp;
+      Patient IDs: <code style="color:var(--accent)">P001–P010</code>
+    </div>
+  </div>
+
+  <!-- ── Root Agent ── -->
+  <div class="section-title">Root Agent</div>
+  <div class="root-agent">
+    <div class="root-agent-header">
+      <div class="root-agent-icon">🏥</div>
+      <div>
+        <div class="root-agent-name">hospital_coordinator</div>
+        <div class="root-agent-sub">Main Hospital Coordinator — triages patients, routes to 35 specialist departments</div>
+        <div style="margin-top:8px;">
+          <span class="model-badge">🤖 openrouter/google/gemini-2.5-flash-lite</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;">Coordinator tools</div>
+      <div class="root-tools">
+        <span class="tool-chip chip-specialty">⚕️ triage_assessment</span>
+        <span class="tool-chip chip-image">🖼️ analyze_medical_image</span>
+        <span class="tool-chip chip-web">🌐 web_search</span>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;">Sub-agents (35 departments)</div>
+      <div class="root-tools">
+        <span class="tool-chip" style="background:#23863611;color:#3fb950;border-color:#23863633;">✅ allergy_immunology_agent</span>
+        <span class="tool-chip" style="background:#23863611;color:#3fb950;border-color:#23863633;">✅ anesthesiology_agent</span>
+        <span class="tool-chip" style="background:#23863611;color:#3fb950;border-color:#23863633;">✅ cardiology_agent</span>
+        <span class="tool-chip" style="background:#23863611;color:#3fb950;border-color:#23863633;">✅ + 32 more…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div></div>
+
+  <!-- ── Department Grid ── -->
+  <div class="section-title" style="margin-top:16px;">Department Agents</div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input class="search-input" type="text" id="searchInput" placeholder="Search departments or tools…" oninput="filterCards()">
+    <button class="filter-btn active-filter" onclick="setFilter('all', this)">All (35)</button>
+    <button class="filter-btn" onclick="setFilter('medical', this)">⚕️ Medical (19)</button>
+    <button class="filter-btn" onclick="setFilter('surgical', this)">🔪 Surgical (11)</button>
+    <button class="filter-btn" onclick="setFilter('diagnostic', this)">🔬 Diagnostic (5)</button>
+    <button class="expand-all-btn" id="expandAllBtn" onclick="toggleExpandAll()">Expand All</button>
+  </div>
+
+  <div id="deptGrid" class="dept-grid"></div>
+
+  <!-- ── Legend ── -->
+  <div class="legend">
+    <div class="legend-section">
+      <h4>Department Categories</h4>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--medical)"></div> Medical specialties</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--surgical)"></div> Surgical specialties</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--diagnostic)"></div> Diagnostic / Therapeutic</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--emergency)"></div> Emergency</div>
+    </div>
+    <div class="legend-section">
+      <h4>Tool Types</h4>
+      <div class="legend-item"><span class="tool-chip chip-common" style="font-size:10px;">🔵 common tool</span></div>
+      <div class="legend-item"><span class="tool-chip chip-specialty" style="font-size:10px;">🟢 specialty tool</span></div>
+      <div class="legend-item"><span class="tool-chip chip-image" style="font-size:10px;">🟣 image tool</span></div>
+      <div class="legend-item"><span class="tool-chip chip-web" style="font-size:10px;">🔴 web search</span></div>
+    </div>
+    <div class="legend-section">
+      <h4>Icons</h4>
+      <div class="legend-item">🖼️ Accepts medical images</div>
+      <div class="legend-item">🤖 gemini-2.0-flash model</div>
+      <div class="legend-item">🌐 Web search enabled</div>
+    </div>
+    <div class="legend-section">
+      <h4>Infrastructure</h4>
+      <div class="legend-item">Framework: <strong>Google ADK</strong></div>
+      <div class="legend-item">Coordinator: <strong>gemini-2.5-flash-lite</strong></div>
+      <div class="legend-item">Departments: <strong>gemini-2.0-flash</strong></div>
+      <div class="legend-item">Web: <strong>browser-use + Chromium</strong></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const DEPARTMENTS = [
+  // ── MEDICAL ──
+  {
+    name: "Allergy & Immunology",
+    agent: "allergy_immunology_agent",
+    category: "medical",
+    icon: "🤧",
+    hasImage: false,
+    description: "Handles allergic diseases, immunodeficiency, anaphylaxis, asthma, food/drug allergies, and immune system disorders.",
+    specialtyTools: ["allergy_skin_test_interpretation", "immunodeficiency_risk_assessment"],
+  },
+  {
+    name: "Cardiology",
+    agent: "cardiology_agent",
+    category: "medical",
+    icon: "🫀",
+    hasImage: true,
+    description: "Handles heart diseases, chest pain, palpitations, hypertension, arrhythmia, heart failure, and cardiovascular risk assessment. Accepts ECG images and cardiac imaging.",
+    specialtyTools: ["analyze_ecg", "assess_cardiac_risk"],
+  },
+  {
+    name: "Dermatology",
+    agent: "dermatology_agent",
+    category: "medical",
+    icon: "🩹",
+    hasImage: true,
+    description: "Handles skin conditions, acne, eczema, psoriasis, skin cancer screening (ABCDE criteria), and allergy testing. Accepts skin lesion photos and rash images.",
+    specialtyTools: ["skin_lesion_analysis", "allergy_patch_test_interpretation"],
+  },
+  {
+    name: "Endocrinology",
+    agent: "endocrinology_agent",
+    category: "medical",
+    icon: "🧬",
+    hasImage: false,
+    description: "Handles hormonal and metabolic disorders including diabetes, thyroid disorders, adrenal disorders, pituitary disorders, osteoporosis, PCOS, and obesity.",
+    specialtyTools: ["diabetes_management_assessment", "thyroid_nodule_assessment"],
+  },
+  {
+    name: "ENT",
+    agent: "ent_agent",
+    category: "medical",
+    icon: "👂",
+    hasImage: false,
+    description: "Handles ear, nose, and throat conditions including sinusitis, hearing loss, tinnitus, vertigo, sleep apnea, and voice disorders.",
+    specialtyTools: ["hearing_assessment", "sleep_apnea_screening"],
+  },
+  {
+    name: "Gastroenterology",
+    agent: "gastroenterology_agent",
+    category: "medical",
+    icon: "🫃",
+    hasImage: false,
+    description: "Handles digestive system disorders including GERD, IBS, IBD, liver disease, pancreatitis, and GI bleeding.",
+    specialtyTools: ["liver_function_assessment", "ibs_symptom_scoring"],
+  },
+  {
+    name: "General Medicine",
+    agent: "general_medicine_agent",
+    category: "medical",
+    icon: "🩺",
+    hasImage: false,
+    description: "Handles common illnesses, preventive care, chronic disease management, vaccinations, and initial evaluation before specialist referral.",
+    specialtyTools: ["bmi_calculator", "vaccination_schedule"],
+  },
+  {
+    name: "Gynecology",
+    agent: "gynecology_agent",
+    category: "medical",
+    icon: "🌸",
+    hasImage: false,
+    description: "Handles women's reproductive health, pregnancy care, PCOS, menstrual disorders, endometriosis, and fertility evaluation.",
+    specialtyTools: ["pregnancy_risk_assessment", "menstrual_cycle_analysis"],
+  },
+  {
+    name: "Hematology",
+    agent: "hematology_agent",
+    category: "medical",
+    icon: "🩸",
+    hasImage: false,
+    description: "Handles blood disorders including anemia, bleeding disorders, thrombocytopenia, DVT/PE, leukemia, lymphoma, multiple myeloma, sickle cell disease, and anticoagulation management.",
+    specialtyTools: ["anemia_classification", "dvt_risk_assessment"],
+  },
+  {
+    name: "Infectious Diseases",
+    agent: "infectious_diseases_agent",
+    category: "medical",
+    icon: "🦠",
+    hasImage: false,
+    description: "Handles bacterial, viral, fungal, and parasitic infections including sepsis, HIV/AIDS, TB, STIs, antimicrobial stewardship, and immunization.",
+    specialtyTools: ["sepsis_screening", "antibiotic_selection_guide"],
+  },
+  {
+    name: "Nephrology",
+    agent: "nephrology_agent",
+    category: "medical",
+    icon: "🫘",
+    hasImage: false,
+    description: "Handles kidney diseases, CKD staging, dialysis management, electrolyte imbalances, and urinary tract issues.",
+    specialtyTools: ["calculate_gfr", "assess_kidney_stage"],
+  },
+  {
+    name: "Neurology",
+    agent: "neurology_agent",
+    category: "medical",
+    icon: "🧠",
+    hasImage: true,
+    description: "Handles brain and nervous system disorders including stroke, epilepsy, headaches, Parkinson's, MS, and consciousness assessment. Accepts brain MRI, CT, and neurological imaging.",
+    specialtyTools: ["assess_stroke_risk", "evaluate_consciousness"],
+  },
+  {
+    name: "Oncology",
+    agent: "oncology_agent",
+    category: "medical",
+    icon: "🎗️",
+    hasImage: false,
+    description: "Handles cancer screening, diagnosis, staging, treatment planning, chemotherapy management, and palliative care.",
+    specialtyTools: ["cancer_screening_recommendation", "staging_assessment"],
+  },
+  {
+    name: "Ophthalmology",
+    agent: "ophthalmology_agent",
+    category: "medical",
+    icon: "👁️",
+    hasImage: true,
+    description: "Handles eye conditions and vision disorders including cataracts, glaucoma, macular degeneration, diabetic retinopathy, retinal detachment, and eye trauma. Accepts fundus photos, retinal images, and eye photos.",
+    specialtyTools: ["vision_assessment", "glaucoma_risk_assessment"],
+  },
+  {
+    name: "Pediatrics",
+    agent: "pediatrics_agent",
+    category: "medical",
+    icon: "👶",
+    hasImage: false,
+    description: "Handles medical care of infants, children, and adolescents including well-child visits, vaccinations, developmental screening, common pediatric infections, and behavioral concerns.",
+    specialtyTools: ["pediatric_growth_assessment", "vaccination_tracker"],
+  },
+  {
+    name: "Psychology",
+    agent: "psychology_agent",
+    category: "medical",
+    icon: "🧘",
+    hasImage: false,
+    description: "Handles mental health assessment, depression and anxiety screening, PTSD, crisis intervention, and therapeutic recommendations.",
+    specialtyTools: ["phq9_depression_screening", "crisis_assessment"],
+  },
+  {
+    name: "Pulmonology",
+    agent: "pulmonology_agent",
+    category: "medical",
+    icon: "🫁",
+    hasImage: false,
+    description: "Handles respiratory and lung conditions including asthma, COPD, pneumonia, pulmonary embolism, and sleep apnea.",
+    specialtyTools: ["spirometry_interpretation", "asthma_control_score"],
+  },
+  {
+    name: "Rheumatology",
+    agent: "rheumatology_agent",
+    category: "medical",
+    icon: "🦴",
+    hasImage: false,
+    description: "Handles autoimmune and musculoskeletal diseases including rheumatoid arthritis, lupus, psoriatic arthritis, gout, Sjögren's syndrome, vasculitis, and fibromyalgia.",
+    specialtyTools: ["arthritis_assessment", "lupus_activity_assessment"],
+  },
+  {
+    name: "Urology",
+    agent: "urology_agent",
+    category: "medical",
+    icon: "🩻",
+    hasImage: false,
+    description: "Handles urinary tract and male reproductive system conditions including kidney stones, BPH, prostate cancer, bladder cancer, urinary incontinence, hematuria, and erectile dysfunction.",
+    specialtyTools: ["kidney_stone_assessment", "prostate_assessment"],
+  },
+  // ── SURGICAL ──
+  {
+    name: "Anesthesiology",
+    agent: "anesthesiology_agent",
+    category: "surgical",
+    icon: "💉",
+    hasImage: false,
+    description: "Handles pre-operative assessment, anesthetic management, airway management, regional/general anesthesia, sedation, and perioperative pain management.",
+    specialtyTools: ["asa_physical_status_classification", "calculate_anesthesia_risk"],
+  },
+  {
+    name: "Cardiothoracic Surgery",
+    agent: "cardiothoracic_surgery_agent",
+    category: "surgical",
+    icon: "🫀",
+    hasImage: false,
+    description: "Handles surgical treatment of heart, lung, and chest conditions including CABG, valve surgery, aortic surgery, lung resection, and esophageal surgery.",
+    specialtyTools: ["cardiac_surgery_risk_score", "thoracic_surgery_feasibility"],
+  },
+  {
+    name: "Colorectal Surgery",
+    agent: "colorectal_surgery_agent",
+    category: "surgical",
+    icon: "🔬",
+    hasImage: false,
+    description: "Handles surgical treatment of colon, rectum, and anal conditions including colorectal cancer, bowel obstruction, hemorrhoids, IBD surgery, and ostomy management.",
+    specialtyTools: ["colorectal_cancer_screening", "bowel_obstruction_assessment"],
+  },
+  {
+    name: "General Surgery",
+    agent: "general_surgery_agent",
+    category: "surgical",
+    icon: "🏥",
+    hasImage: false,
+    description: "Handles surgical treatment of general conditions including appendicitis, cholecystitis, hernia, bowel obstruction, breast surgery, thyroid surgery, and bariatric surgery.",
+    specialtyTools: ["appendicitis_scoring", "surgical_risk_assessment"],
+  },
+  {
+    name: "Neurosurgery",
+    agent: "neurosurgery_agent",
+    category: "surgical",
+    icon: "🧠",
+    hasImage: false,
+    description: "Handles surgical treatment of neurological conditions including brain tumors, intracranial hemorrhage, spinal disorders, cerebral aneurysms, hydrocephalus, and traumatic brain injury.",
+    specialtyTools: ["intracranial_pressure_assessment", "spinal_cord_injury_assessment"],
+  },
+  {
+    name: "Orthopedics",
+    agent: "orthopedics_agent",
+    category: "surgical",
+    icon: "🦵",
+    hasImage: true,
+    description: "Handles bone and joint issues, fractures, arthritis, sports injuries, spine disorders, and osteoporosis assessment. Accepts bone X-rays and joint MRI images.",
+    specialtyTools: ["fracture_risk_assessment", "joint_mobility_score"],
+  },
+  {
+    name: "Physical Medicine & Rehab",
+    agent: "physical_medicine_rehab_agent",
+    category: "surgical",
+    icon: "♿",
+    hasImage: false,
+    description: "Handles rehabilitation and functional restoration including stroke rehab, spinal cord injury rehab, TBI rehab, amputee rehab, pain management, and electrodiagnostic medicine.",
+    specialtyTools: ["functional_independence_assessment", "stroke_rehabilitation_prognosis"],
+  },
+  {
+    name: "Plastic Surgery",
+    agent: "plastic_surgery_agent",
+    category: "surgical",
+    icon: "🩹",
+    hasImage: true,
+    description: "Handles burns (Parkland resuscitation, ABA referral criteria), wound reconstruction, skin grafting, flap surgery, breast reconstruction, cleft repair, and cosmetic procedures. Accepts burn and wound images.",
+    specialtyTools: ["burn_assessment", "reconstructive_planning"],
+  },
+  {
+    name: "Thoracic Surgery",
+    agent: "thoracic_surgery_agent",
+    category: "surgical",
+    icon: "🫁",
+    hasImage: false,
+    description: "Handles lung resection risk assessment (BTS/ESTS guidelines), pleural disease (Light's criteria, empyema, pneumothorax), esophageal surgery, mediastinal tumors, and lung cancer surgery.",
+    specialtyTools: ["pulmonary_function_surgical_risk", "pleural_disease_assessment"],
+  },
+  {
+    name: "Vascular Surgery",
+    agent: "vascular_surgery_agent",
+    category: "surgical",
+    icon: "🩸",
+    hasImage: false,
+    description: "Handles blood vessel disorders including abdominal aortic aneurysm, peripheral arterial disease, carotid disease, DVT, varicose veins, acute limb ischemia, and diabetic foot ulcers.",
+    specialtyTools: ["peripheral_arterial_disease_assessment", "aortic_aneurysm_assessment"],
+  },
+  // ── DIAGNOSTIC ──
+  {
+    name: "Emergency Medicine",
+    agent: "emergency_medicine_agent",
+    category: "emergency",
+    icon: "🚨",
+    hasImage: true,
+    description: "Handles acute and emergency conditions including trauma, chest pain, stroke, respiratory emergencies, cardiac arrest, shock, anaphylaxis, and triage assessment. Accepts wound, trauma, and injury photos.",
+    specialtyTools: ["chest_pain_risk_stratification", "trauma_triage_assessment"],
+  },
+  {
+    name: "Critical Care",
+    agent: "critical_care_agent",
+    category: "diagnostic",
+    icon: "🏨",
+    hasImage: false,
+    description: "Handles ICU-level care including sepsis, ARDS, mechanical ventilation, multi-organ dysfunction, hemodynamic monitoring, and post-cardiac arrest care.",
+    specialtyTools: ["calculate_severity_score", "organ_dysfunction_assessment"],
+  },
+  {
+    name: "Nuclear Medicine",
+    agent: "nuclear_medicine_agent",
+    category: "diagnostic",
+    icon: "☢️",
+    hasImage: true,
+    description: "Handles diagnostic and therapeutic nuclear medicine including PET/CT imaging, bone scans, thyroid scanning and therapy, cardiac nuclear stress testing, and V/Q scans. Accepts PET/CT and nuclear scintigraphy images.",
+    specialtyTools: ["pet_ct_oncology_assessment", "thyroid_scan_interpretation"],
+  },
+  {
+    name: "Pathology",
+    agent: "pathology_agent",
+    category: "diagnostic",
+    icon: "🔬",
+    hasImage: true,
+    description: "Interprets biopsy and histopathology results using WHO classification and IHC biomarkers (ER/PR/HER2, MSI, PD-L1), identifies AACC critical lab values with immediate management protocols, and provides MDT-ready reports. Accepts histopathology slide images.",
+    specialtyTools: ["interpret_biopsy_result", "critical_lab_value_alert"],
+  },
+  {
+    name: "Radiation Oncology",
+    agent: "radiation_oncology_agent",
+    category: "diagnostic",
+    icon: "☢️",
+    hasImage: false,
+    description: "Calculates evidence-based radiation dose prescriptions (BED/EQD2), manages IMRT/SBRT/SRS/brachytherapy, assesses CTCAE-graded radiation toxicities, and coordinates concurrent systemic therapy.",
+    specialtyTools: ["calculate_radiation_dose", "radiation_toxicity_assessment"],
+  },
+  {
+    name: "Radiology",
+    agent: "radiology_agent",
+    category: "diagnostic",
+    icon: "🩻",
+    hasImage: true,
+    description: "Applies ACR Appropriateness Criteria to select optimal imaging modality (X-ray, CT, MRI, ultrasound, PET/CT), interprets critical findings, and communicates urgent results per Joint Commission standards. Accepts X-ray, CT, MRI, ultrasound, and PET/CT images.",
+    specialtyTools: ["imaging_study_selector", "report_critical_findings"],
+  },
+];
+
+const COMMON_TOOLS = [
+  "get_patient_info", "record_vitals", "check_drug_interactions",
+  "schedule_appointment", "get_lab_results", "generate_soap_note", "calculate_medication_dose"
+];
+
+let currentFilter = 'all';
+let allExpanded = false;
+
+function renderCard(dept) {
+  return `
+    <div class="dept-card ${dept.category}"
+         data-category="${dept.category}"
+         data-search="${dept.name.toLowerCase()} ${dept.agent.toLowerCase()} ${dept.specialtyTools.join(' ').toLowerCase()}"
+         onclick="toggleCard(this)">
+      <div class="dept-header">
+        <div>
+          <div class="dept-name">${dept.icon} ${dept.name}</div>
+          <div class="dept-agent-id">${dept.agent}</div>
+        </div>
+        <div class="dept-icons">
+          ${dept.hasImage ? '<span class="icon-badge" title="Accepts medical images">🖼️</span>' : ''}
+          <span class="icon-badge" title="Web search enabled">🌐</span>
+        </div>
+      </div>
+      <div class="dept-tools-preview">
+        ${dept.specialtyTools.map(t => `<span class="tool-chip chip-specialty" style="font-size:10px;">🟢 ${t}</span>`).join('')}
+      </div>
+      <div class="dept-detail">
+        <div class="detail-section">
+          <div class="detail-label">Description</div>
+          <div class="desc-text">${dept.description}</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">Model</div>
+          <div><span class="model-badge" style="font-size:10px;">🤖 gemini-2.0-flash</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">All Tools (${COMMON_TOOLS.length + dept.specialtyTools.length + (dept.hasImage ? 2 : 1)})</div>
+          <div class="detail-tools">
+            ${COMMON_TOOLS.map(t => `<span class="tool-chip chip-common" style="font-size:10px;">🔵 ${t}</span>`).join('')}
+            ${dept.specialtyTools.map(t => `<span class="tool-chip chip-specialty" style="font-size:10px;">🟢 ${t}</span>`).join('')}
+            ${dept.hasImage ? `<span class="tool-chip chip-image" style="font-size:10px;">🟣 analyze_medical_image</span>` : ''}
+            <span class="tool-chip chip-web" style="font-size:10px;">🔴 web_search</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('deptGrid');
+  grid.innerHTML = DEPARTMENTS.map(renderCard).join('');
+}
+
+function toggleCard(el) {
+  el.classList.toggle('active');
+}
+
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.dept-card').forEach(card => {
+    const search = card.dataset.search || '';
+    const cat = card.dataset.category || '';
+    const matchesFilter = currentFilter === 'all' || cat === currentFilter;
+    const matchesSearch = !q || search.includes(q);
+    card.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
+  });
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter'));
+  btn.classList.add('active-filter');
+  filterCards();
+}
+
+function toggleExpandAll() {
+  allExpanded = !allExpanded;
+  document.querySelectorAll('.dept-card').forEach(card => {
+    card.classList.toggle('active', allExpanded);
+  });
+  document.getElementById('expandAllBtn').textContent = allExpanded ? 'Collapse All' : 'Expand All';
+}
+
+renderGrid();
+</script>
+</body>
+</html>

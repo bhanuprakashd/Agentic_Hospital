@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agentic Hospital — Current Implementation Report</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:    #0d2137;
+    --navy2:   #1a3a5c;
+    --teal:    #007b8a;
+    --teal2:   #00a6b8;
+    --green:   #1a6b3c;
+    --red-d:   #7b2d00;
+    --purple:  #4a2080;
+    --ops:     #005a7a;
+    --tools:   #333;
+    --bg:      #f4f7fa;
+    --card:    #ffffff;
+    --border:  #d0dae6;
+    --text:    #1c2a38;
+    --muted:   #5a6b7c;
+    --code-bg: #1e2d3d;
+    --code-fg: #cfd8e3;
+    --sidebar-w: 270px;
+    --header-h: 64px;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.65;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Top header bar ── */
+  .site-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .site-header .logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  .site-header .meta {
+    font-size: 12px;
+    color: #99bbd4;
+    margin-left: auto;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--teal);
+    color: #fff;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex;
+    margin-top: var(--header-h);
+    flex: 1;
+  }
+
+  /* ── Sidebar TOC ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    position: sticky;
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+    overflow-y: auto;
+    background: var(--navy2);
+    padding: 20px 0 40px;
+    border-right: 1px solid rgba(255,255,255,.08);
+  }
+  .sidebar::-webkit-scrollbar { width: 5px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+  .toc-title {
+    color: var(--teal2);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0 18px 10px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    margin-bottom: 8px;
+  }
+  .toc-list { list-style: none; }
+  .toc-list li a {
+    display: block;
+    padding: 6px 18px;
+    color: #a8c4d8;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background .15s, color .15s;
+    border-left: 3px solid transparent;
+  }
+  .toc-list li a:hover {
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    border-left-color: var(--teal2);
+  }
+  .toc-list li.sub a {
+    padding-left: 32px;
+    font-size: 12px;
+    color: #7898ab;
+  }
+  .toc-list li.sub a:hover { color: #b8d4e0; }
+
+  /* ── Main content ── */
+  .main {
+    flex: 1;
+    min-width: 0;
+    padding: 36px 48px 80px;
+    max-width: 1100px;
+  }
+
+  /* ── Typography ── */
+  h1 { font-size: 2rem; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--navy2);
+    margin: 40px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--teal);
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--navy2);
+    margin: 28px 0 10px;
+  }
+  h4 {
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--teal);
+    margin: 20px 0 8px;
+  }
+  p { margin-bottom: 12px; }
+  ul, ol { padding-left: 22px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  strong { color: var(--navy); }
+
+  /* ── Document meta block ── */
+  .doc-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0 28px;
+  }
+  .doc-meta .chip {
+    background: var(--navy2);
+    color: #b8d4e8;
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+  }
+  .doc-meta .chip strong { color: var(--teal2); }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  thead { background: var(--navy2); color: #fff; }
+  thead th { padding: 10px 14px; text-align: left; font-weight: 600; letter-spacing: .3px; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:nth-child(even) { background: #f0f5fa; }
+  tbody tr:hover { background: #e3edf7; }
+  tbody td { padding: 9px 14px; vertical-align: top; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 14px 0 20px;
+    border-left: 3px solid var(--teal);
+  }
+  code {
+    background: #dde8f0;
+    color: var(--navy);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+  /* ── Mermaid diagrams ── */
+  .mermaid-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 16px 0 24px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    text-align: center;
+  }
+  .mermaid { max-width: 100%; }
+
+  /* ── Info/callout boxes ── */
+  .callout {
+    border-left: 4px solid var(--teal);
+    background: #eaf6f8;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .callout.warn { border-color: #d97706; background: #fef3c7; }
+  .callout.info { border-color: var(--navy2); background: #e8eef6; }
+
+  /* ── Stat cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin: 20px 0 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 16px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  }
+  .stat-card .number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--navy2);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+
+  /* ── Section cards ── */
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin: 16px 0 24px;
+    box-shadow: 0 1px 5px rgba(0,0,0,.05);
+  }
+
+  /* ── Tag list ── */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+  .tag {
+    background: #dde8f2;
+    color: var(--navy2);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 12.5px;
+    font-family: 'Cascadia Code', monospace;
+  }
+  .tag.green { background: #d4eddb; color: var(--green); }
+  .tag.red   { background: #f7e5da; color: var(--red-d); }
+  .tag.teal  { background: #d0eff3; color: var(--teal); }
+  .tag.done  { background: #d4eddb; color: #155724; }
+  .tag.plan  { background: #fff3cd; color: #856404; }
+
+  /* ── Scrollbar ── */
+  .main::-webkit-scrollbar { width: 8px; }
+  .main::-webkit-scrollbar-thumb { background: #c0cdd8; border-radius: 4px; }
+
+  /* ── Print ── */
+  @media print {
+    .sidebar { display: none; }
+    .main { max-width: 100%; padding: 20px; }
+    .site-header { position: relative; }
+    .layout { margin-top: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ TOP HEADER ══════════════ -->
+<header class="site-header">
+  <span class="logo">🏥 Agentic Hospital</span>
+  <span class="badge">Google ADK</span>
+  <span class="badge">38 Agents</span>
+  <span class="badge">101 Tools</span>
+  <span class="meta">Implementation Report &nbsp;·&nbsp; 2026-02-20</span>
+</header>
+
+<div class="layout">
+
+<!-- ══════════════ SIDEBAR TOC ══════════════ -->
+<nav class="sidebar">
+  <div class="toc-title">Table of Contents</div>
+  <ul class="toc-list">
+    <li><a href="#s1">1. System Overview</a></li>
+    <li><a href="#s2">2. Architecture</a></li>
+    <li class="sub"><a href="#s2-1">2.1 System Block Diagram</a></li>
+    <li class="sub"><a href="#s2-2">2.2 Agent Hierarchy</a></li>
+    <li class="sub"><a href="#s2-3">2.3 Patient Intake Flow</a></li>
+    <li class="sub"><a href="#s2-4">2.4 Routing Flow</a></li>
+    <li><a href="#s3">3. Agent Roster (38)</a></li>
+    <li class="sub"><a href="#s3-1">3.1 Root Coordinator</a></li>
+    <li class="sub"><a href="#s3-2">3.2 Medical Specialties</a></li>
+    <li class="sub"><a href="#s3-3">3.3 Surgical Specialties</a></li>
+    <li class="sub"><a href="#s3-4">3.4 Diagnostic &amp; Support</a></li>
+    <li class="sub"><a href="#s3-5">3.5 Hospital Operations</a></li>
+    <li><a href="#s4">4. Tool Inventory</a></li>
+    <li class="sub"><a href="#s4-1">4.1 Common Tools</a></li>
+    <li class="sub"><a href="#s4-2">4.2 Monitoring Tools</a></li>
+    <li class="sub"><a href="#s4-3">4.3 Image Analysis</a></li>
+    <li class="sub"><a href="#s4-4">4.4 Web Search</a></li>
+    <li class="sub"><a href="#s4-5">4.5 Bed Management</a></li>
+    <li class="sub"><a href="#s4-6">4.6 Specialty Tools</a></li>
+    <li class="sub"><a href="#s4-7">4.7 Tool Count Summary</a></li>
+    <li><a href="#s5">5. Patient &amp; Lab Database</a></li>
+    <li><a href="#s6">6. Bed Management System</a></li>
+    <li class="sub"><a href="#s6-2">6.2 Ward Inventory</a></li>
+    <li class="sub"><a href="#s6-3">6.3 Bed States</a></li>
+    <li class="sub"><a href="#s6-4">6.4 Visualisations</a></li>
+    <li class="sub"><a href="#s6-5">6.5 Admission Workflow</a></li>
+    <li><a href="#s7">7. Clinical Reasoning</a></li>
+    <li><a href="#s8">8. Prompt Architecture</a></li>
+    <li><a href="#s9">9. File Structure</a></li>
+    <li><a href="#s10">10. Dependencies</a></li>
+    <li><a href="#s11">11. Running the System</a></li>
+    <li><a href="#s12">12. What's Next</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════ MAIN CONTENT ══════════════ -->
+<main class="main">
+
+  <h1>Agentic Hospital — Implementation Report</h1>
+
+  <div class="doc-meta">
+    <div class="chip"><strong>Date:</strong> 2026-02-20</div>
+    <div class="chip"><strong>Framework:</strong> Google ADK</div>
+    <div class="chip"><strong>Model:</strong> gemini-2.5-flash-lite via LiteLLM</div>
+    <div class="chip"><strong>Entry point:</strong> <code>adk web</code> → localhost:8000</div>
+  </div>
+
+  <!-- ── KEY STATS ── -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="number">38</div><div class="label">Specialist Agents</div></div>
+    <div class="stat-card"><div class="number">101</div><div class="label">Tool Functions</div></div>
+    <div class="stat-card"><div class="number">325</div><div class="label">Inpatient Beds</div></div>
+    <div class="stat-card"><div class="number">20</div><div class="label">Wards</div></div>
+    <div class="stat-card"><div class="number">10</div><div class="label">Mock Patients</div></div>
+    <div class="stat-card"><div class="number">35</div><div class="label">Departments</div></div>
+    <div class="stat-card"><div class="number">40</div><div class="label">Tool Files</div></div>
+    <div class="stat-card"><div class="number">13</div><div class="label">Image Types</div></div>
+  </div>
+
+  <hr />
+
+  <!-- ════════ SECTION 1 ════════ -->
+  <h2 id="s1">1. System Overview</h2>
+  <p>
+    Agentic Hospital is a fully simulated AI-powered hospital built on <strong>Google ADK</strong>.
+    It models a <strong>500-bed academic medical centre</strong> with a multi-agent architecture where
+    a root coordinator triages incoming patient queries and routes them to one of
+    <strong>38 specialist sub-agents</strong>. The system supports text conversations, medical image
+    analysis, real-time web search for clinical guidelines, critical lab value monitoring, and a live
+    bed management simulation with ward visualisations.
+  </p>
+
+  <div class="section-card">
+    <h4>Design Philosophy</h4>
+    <ul>
+      <li>Every agent is a specialist — they do not overlap</li>
+      <li>Tools are synchronous Python functions returning structured dicts</li>
+      <li>All patient, lab, and bed data are in-memory mocks (no database required)</li>
+      <li>The root agent routes; specialist agents treat and document</li>
+      <li>Web search fills the gap for any knowledge beyond the training cutoff</li>
+    </ul>
+  </div>
+
+  <hr />
+
+  <!-- ════════ SECTION 2 ════════ -->
+  <h2 id="s2">2. Architecture</h2>
+
+  <h3 id="s2-1">2.1 System Block Diagram</h3>
+  <div class="mermaid-wrap">
+    <div class="mermaid">
+flowchart LR
+    subgraph INPUT["Patient Input"]
+        P[Patient]
+    end
+
+    subgraph ROOT["Root Layer"]
+        C[hospital_coordinator]
+    end
+
+    subgraph OPS["Operations"]
+        T[triage_nurse]
+        PH[pharmacy]
+        D[discharge_planning]
+        A[hospital_admission]
+    end
+
+    subgraph DEPT["Medical/Surgical Departments"]
+        D1[Cardiology]
+        D2[Neurology]
+        D3[Orthopedics]
+        D4[+32 more...]
+    end
+
+    subgraph TOOLS["Tool Layer"]
+        CT[common_tools]
+        MT[monitoring]
+        IT[image]
+        WT[websearch]
+        BT[bed_mgmt]
+        TRT[triage_tools]
+        PHT[pharmacy_tools]
+        DT[discharge_tools]
+    end
+
+    P --> C
+    C -->|Phase 1| T
+    T -->|Phase 2| C
+    C -->|Phase 3| DEPT
+    DEPT -->|Phase 4| PH
+    PH --> C
+    C --> A
+    A --> D
+    D --> C
+
+    C --> CT & MT & IT & WT
+    T --> TRT
+    PH --> PHT & CT
+    D --> DT
+    A --> BT & CT
+
+    style ROOT fill:#1a3a5c,color:#fff
+    style OPS fill:#005a7a,color:#fff
+    style DEPT fill:#1a6b3c,color:#fff
+    style TOOLS fill:#333,color:#fff
+    style INPUT fill:#eee,color:#333
+    </div>
+  </div>
+
+  <h3 id="s2-2">2.2 Agent Hierarchy</h3>
+  <pre>hospital_coordinator  (root_agent — ADK entry point)
+│
+├── Tools (10):
+│   get_patient_info · get_patient_encounter_history · check_critical_lab_values
+│   triage_assessment · request_mdt_consultation · generate_treatment_plan
+│   record_patient_encounter · generate_deterioration_alert
+│   analyze_medical_image · web_search
+│
+└── Sub-Agents (40):
+    ├── Medical Specialties (15)
+    │   allergy_immunology · cardiology · endocrinology · gastroenterology
+    │   general_medicine · gynecology · hematology · infectious_diseases
+    │   nephrology · neurology · oncology · pediatrics · psychology
+    │   pulmonology · rheumatology
+    │
+    ├── Triage (Sprint 1)
+    │   triage_nurse_agent
+    │
+    ├── Pharmacy (Sprint 2)
+    │   pharmacy_agent
+    │
+    ├── Discharge Planning (Sprint 3)
+    │   discharge_planning_agent
+    │
+    ├── Surgical Specialties (9)
+    │   cardiothoracic_surgery · colorectal_surgery · general_surgery
+    │   neurosurgery · orthopedics · plastic_surgery · thoracic_surgery
+    │   urology · vascular_surgery
+    │
+    ├── Diagnostic &amp; Support Specialties (11)
+    │   anesthesiology · critical_care · dermatology · emergency_medicine
+    │   ent · nuclear_medicine · ophthalmology · pathology
+    │   physical_medicine_rehab · radiation_oncology · radiology
+    │
+    └── Hospital Operations
+        hospital_admission_agent</pre>
+
+  <h3 id="s2-3">2.3 Patient Intake Flow (4-Phase + Admission) <span class="badge">Updated: Sprints 1-4</span></h3>
+  <div class="mermaid-wrap">
+    <div class="mermaid">
+flowchart TD
+    A([Patient arrives]) --> B{Has patient ID?}
+    B -- Yes --> C[Phase 1 Registration\nget_patient_info\nget_patient_encounter_history]
+    B -- No --> D[Collect self-reported\ndemographics manually]
+    C --> E[Present pre-triage\nrecord summary to patient]
+    D --> E
+    E --> F[Phase 2 Nurse Triage\ntriage_nurse_agent]
+    F --> F1[calculate_esi_score\nESI 1-5]
+    F1 --> F2[record_nurse_triage\nvitals pain allergies]
+    F2 --> F3[assign_waiting_priority\nqueue or resuscitation]
+
+    F3 --> G{ESI 1-2?}
+    G -- Yes --> H[IMMEDIATE\nRoute to emergency\nor critical_care_agent]
+    H --> H2[Emergency assessment\nstabilisation]
+    H2 --> ADMIT_E{Inpatient\nadmission?}
+
+    G -- No --> I[Phase 3 Routing\ncoordinator to specialist]
+    I --> J[Prepare clinical handoff\nallergies meds prior visits\nESI level active lab alerts]
+    J --> K[Route to specialist]
+    K --> L[Specialist assessment\nspecialty tools\ncheck_drug_interactions]
+    
+    L --> MED{Medication\nordered?}
+    MED -- Yes --> PHARM[Phase 4 Pharmacy\npharmacy_agent]
+    PHARM --> P1[verify_medication_order\nallergies interactions]
+    P1 --> P2[dispense_medication\nbatch expiry]
+    P2 --> P3[medication_reconciliation\nadmission vs discharge]
+
+    MED -- No --> ADMIT_S
+
+    ADMIT_S -- Yes --> ADM2[hospital_admission_agent\nassign_bed\nward visualization]
+    ADM2 --> VIZ[get_ward_visualization\nshow updated ward map]
+    VIZ --> DISCH{Discharge?}
+
+    ADMIT_E -- Yes --> ADM[hospital_admission_agent\nassign_bed EMERGENCY\nICU or Emergency ward]
+    ADM --> VIZ2[get_ward_visualization]
+    VIZ2 --> DISCH
+
+    DISCH -- Yes --> DISCH_AG[discharge_planning_agent]
+    DISCH_AG --> D1[check_discharge_criteria\nreadiness assessment]
+    D1 --> D2[generate_discharge_summary\nclinical course meds]
+    D2 --> D3[generate_tta_prescription\nTTA prescription]
+    D3 --> D4[send_gp_letter\nGP notification]
+    D4 --> D5[arrange_community_services\nPT OT district nursing]
+    D5 --> DISCHARGED([Patient discharged])
+
+    DISCH -- No --> ADMITTED([Patient admitted\ninpatient ward])
+
+    ADMIT_E -- No --> DISCH2[Stabilised discharged\nrecord_patient_encounter]
+    DISCH2 --> DISCHARGED2([Outpatient])
+
+    ADMIT_S -- No --> OUTPT[generate_soap_note\nschedule_appointment]
+    OUTPT --> DISCHARGED3([Outpatient follow-up])
+
+    PHARM --> ADMIT_S
+
+    style H fill:#c0392b,color:#fff
+    style F fill:#2e7d32,color:#fff
+    style PHARM fill:#7b1fa2,color:#fff
+    style DISCH_AG fill:#1565c0,color:#fff
+    style ADM fill:#005a7a,color:#fff
+    style ADM2 fill:#005a7a,color:#fff
+    style ADMITTED fill:#1a6b3c,color:#fff
+    style DISCHARGED fill:#4a7a4a,color:#fff
+    style DISCHARGED2 fill:#4a7a4a,color:#fff
+    style DISCHARGED3 fill:#4a7a4a,color:#fff
+    </div>
+  </div>
+  <div class="callout info">
+    <strong>Updated Flow with Sprints 1-4:</strong>
+    <ul>
+      <li><strong>Phase 1:</strong> Registration — coordinator gets patient info, history, critical labs</li>
+      <li><strong>Phase 2:</strong> Nurse Triage (Sprint 1) — triage_nurse_agent performs ESI v4 scoring</li>
+      <li><strong>Phase 3:</strong> Routing — coordinator routes to specialist based on ESI level</li>
+      <li><strong>Phase 4:</strong> Pharmacy (Sprint 2) — pharmacy_agent verifies & dispenses medications</li>
+      <li><strong>Discharge:</strong> Discharge Planning (Sprint 3) — generates summary, GP letter, community referrals</li>
+      <li><strong>Diagnostic:</strong> Diagnostic Ordering (Sprint 4) — order_investigation() workflow integrated</li>
+    </ul>
+  </div>
+
+  <h3 id="s2-4">2.4 Patient Flow (Updated with Sprints 1-4)</h3>
+  <pre>Patient arrives
+      │
+      ▼
+hospital_coordinator (Phase 1: Registration)
+   └─ get_patient_info + get_patient_encounter_history + check_critical_lab_values
+      │
+      ▼
+triage_nurse_agent (Phase 2: Nurse Triage) [Sprint 1]
+   ├─ calculate_esi_score() → ESI 1-5
+   ├─ record_nurse_triage() → vitals, pain, allergies
+   └─ assign_waiting_priority() → queue or resuscitation
+      │
+      ├─ ESI 1-2 → emergency_medicine_agent / critical_care_agent (immediate)
+      └─ ESI 3-5 → hospital_coordinator (Phase 3: Routing)
+                        │
+                        ▼
+                   specialist_agent
+                      ├─ get_patient_info
+                      ├─ get_lab_results / order_investigation() [Sprint 4]
+                      ├─ record_vitals
+                      ├─ check_drug_interactions
+                      ├─ [2 specialty tools]
+                      ├─ web_search
+                      └─ generate_soap_note
+                        │
+                        ▼
+                  If medication ordered:
+                   pharmacy_agent [Sprint 2]
+                      ├─ verify_medication_order()
+                      ├─ medication_reconciliation()
+                      └─ dispense_medication()
+                        │
+                        ▼
+                  If admission:
+                   hospital_admission_agent_agent
+                      └─ assign_bed()
+                        │
+                        ▼
+                  If discharge:
+                   discharge_planning_agent [Sprint 3]
+                      ├─ check_discharge_criteria()
+                      ├─ generate_discharge_summary()
+                      ├─ pharmacy_agent.generate_tta_prescription()
+                      ├─ send_gp_letter()
+                      └─ arrange_community_services()</pre>
+
+  <hr />
+
+  <!-- ════════ SECTION 3 ════════ -->
+  <h2 id="s3">3. Agent Roster</h2>
+
+  <h3 id="s3-1">3.1 Root Coordinator</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Agent</th><th>Variable</th><th>Model</th><th>Sub-agents</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Hospital Coordinator</td>
+          <td><code>root_agent</code> → <code>hospital_coordinator</code></td>
+          <td><code>gemini-2.5-flash-lite</code></td>
+          <td>38</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>Coordinator tools (10):</strong></p>
+  <div class="tag-list">
+    <span class="tag">get_patient_info</span>
+    <span class="tag">get_patient_encounter_history</span>
+    <span class="tag">check_critical_lab_values</span>
+    <span class="tag">triage_assessment</span>
+    <span class="tag">request_mdt_consultation</span>
+    <span class="tag">generate_treatment_plan</span>
+    <span class="tag">record_patient_encounter</span>
+    <span class="tag">generate_deterioration_alert</span>
+    <span class="tag">analyze_medical_image</span>
+    <span class="tag">web_search</span>
+  </div>
+
+  <h3 id="s3-2">3.2 Medical Specialties (17 agents)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>File</th><th>Agent Variable</th><th>Persona</th><th>Specialty Tools</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>allergy_immunology.py</code></td><td><code>allergy_immunology_agent</code></td><td>Dr. AllergyAI</td><td><code>allergy_skin_test_interpretation</code>, <code>immunodeficiency_risk_assessment</code></td></tr>
+        <tr><td>2</td><td><code>cardiology.py</code></td><td><code>cardiology_agent</code></td><td>Dr. CardioAI</td><td><code>analyze_ecg</code>, <code>assess_cardiac_risk</code></td></tr>
+        <tr><td>3</td><td><code>dermatology.py</code></td><td><code>dermatology_agent</code></td><td>Dr. DermaAI</td><td><code>skin_lesion_analysis</code>, <code>allergy_patch_test_interpretation</code></td></tr>
+        <tr><td>4</td><td><code>endocrinology.py</code></td><td><code>endocrinology_agent</code></td><td>Dr. EndoAI</td><td><code>diabetes_management_assessment</code>, <code>thyroid_nodule_assessment</code></td></tr>
+        <tr><td>5</td><td><code>ent.py</code></td><td><code>ent_agent</code></td><td>Dr. ENTAI</td><td><code>hearing_assessment</code>, <code>sleep_apnea_screening</code></td></tr>
+        <tr><td>6</td><td><code>gastroenterology.py</code></td><td><code>gastroenterology_agent</code></td><td>Dr. GastroAI</td><td><code>liver_function_assessment</code>, <code>ibs_symptom_scoring</code></td></tr>
+        <tr><td>7</td><td><code>general_medicine.py</code></td><td><code>general_medicine_agent</code></td><td>Dr. PrimaryAI</td><td><code>bmi_calculator</code>, <code>vaccination_schedule</code></td></tr>
+        <tr><td>8</td><td><code>gynecology.py</code></td><td><code>gynecology_agent</code></td><td>Dr. GyneAI</td><td><code>pregnancy_risk_assessment</code>, <code>menstrual_cycle_analysis</code></td></tr>
+        <tr><td>9</td><td><code>hematology.py</code></td><td><code>hematology_agent</code></td><td>Dr. HematoAI</td><td><code>anemia_classification</code>, <code>dvt_risk_assessment</code></td></tr>
+        <tr><td>10</td><td><code>infectious_diseases.py</code></td><td><code>infectious_diseases_agent</code></td><td>Dr. InfectAI</td><td><code>sepsis_screening</code>, <code>antibiotic_selection_guide</code></td></tr>
+        <tr><td>11</td><td><code>nephrology.py</code></td><td><code>nephrology_agent</code></td><td>Dr. NephroAI</td><td><code>calculate_gfr</code>, <code>assess_kidney_stage</code></td></tr>
+        <tr><td>12</td><td><code>neurology.py</code></td><td><code>neurology_agent</code></td><td>Dr. NeuroAI</td><td><code>assess_stroke_risk</code>, <code>evaluate_consciousness</code></td></tr>
+        <tr><td>13</td><td><code>oncology.py</code></td><td><code>oncology_agent</code></td><td>Dr. OncoAI</td><td><code>cancer_screening_recommendation</code>, <code>staging_assessment</code></td></tr>
+        <tr><td>14</td><td><code>pediatrics.py</code></td><td><code>pediatrics_agent</code></td><td>Dr. PedsAI</td><td><code>pediatric_growth_assessment</code>, <code>vaccination_tracker</code></td></tr>
+        <tr><td>15</td><td><code>psychology.py</code></td><td><code>psychology_agent</code></td><td>Dr. PsychoAI</td><td><code>phq9_depression_screening</code>, <code>gad7_anxiety_screening</code></td></tr>
+        <tr><td>16</td><td><code>pulmonology.py</code></td><td><code>pulmonology_agent</code></td><td>Dr. PulmoAI</td><td><code>spirometry_interpretation</code>, <code>asthma_control_score</code></td></tr>
+        <tr><td>17</td><td><code>rheumatology.py</code></td><td><code>rheumatology_agent</code></td><td>Dr. RheumaAI</td><td><code>arthritis_assessment</code>, <code>lupus_activity_assessment</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s3-3">3.3 Surgical Specialties (9 agents)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>File</th><th>Agent Variable</th><th>Specialty Tools</th></tr></thead>
+      <tbody>
+        <tr><td>18</td><td><code>cardiothoracic_surgery.py</code></td><td><code>cardiothoracic_surgery_agent</code></td><td><code>cardiac_surgery_risk_score</code>, <code>thoracic_surgery_feasibility</code></td></tr>
+        <tr><td>19</td><td><code>colorectal_surgery.py</code></td><td><code>colorectal_surgery_agent</code></td><td><code>colorectal_cancer_screening</code>, <code>bowel_obstruction_assessment</code></td></tr>
+        <tr><td>20</td><td><code>general_surgery.py</code></td><td><code>general_surgery_agent</code></td><td><code>appendicitis_scoring</code>, <code>surgical_risk_assessment</code></td></tr>
+        <tr><td>21</td><td><code>neurosurgery.py</code></td><td><code>neurosurgery_agent</code></td><td><code>intracranial_pressure_assessment</code>, <code>spinal_cord_injury_assessment</code></td></tr>
+        <tr><td>22</td><td><code>orthopedics.py</code></td><td><code>orthopedics_agent</code></td><td><code>fracture_risk_assessment</code>, <code>joint_mobility_score</code></td></tr>
+        <tr><td>23</td><td><code>plastic_surgery.py</code></td><td><code>plastic_surgery_agent</code></td><td><code>burn_assessment</code>, <code>reconstructive_planning</code></td></tr>
+        <tr><td>24</td><td><code>thoracic_surgery.py</code></td><td><code>thoracic_surgery_agent</code></td><td><code>pulmonary_function_surgical_risk</code>, <code>pleural_disease_assessment</code></td></tr>
+        <tr><td>25</td><td><code>urology.py</code></td><td><code>urology_agent</code></td><td><code>kidney_stone_assessment</code>, <code>prostate_assessment</code></td></tr>
+        <tr><td>26</td><td><code>vascular_surgery.py</code></td><td><code>vascular_surgery_agent</code></td><td><code>peripheral_arterial_disease_assessment</code>, <code>aortic_aneurysm_assessment</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s3-4">3.4 Diagnostic &amp; Support Specialties (11 agents)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>File</th><th>Agent Variable</th><th>Specialty Tools</th></tr></thead>
+      <tbody>
+        <tr><td>27</td><td><code>anesthesiology.py</code></td><td><code>anesthesiology_agent</code></td><td><code>asa_physical_status_classification</code>, <code>calculate_anesthesia_risk</code></td></tr>
+        <tr><td>28</td><td><code>critical_care.py</code></td><td><code>critical_care_agent</code></td><td><code>calculate_severity_score</code>, <code>organ_dysfunction_assessment</code></td></tr>
+        <tr><td>29</td><td><code>emergency_medicine.py</code></td><td><code>emergency_medicine_agent</code></td><td><code>chest_pain_risk_stratification</code>, <code>trauma_triage_assessment</code></td></tr>
+        <tr><td>30</td><td><code>nuclear_medicine.py</code></td><td><code>nuclear_medicine_agent</code></td><td><code>pet_ct_oncology_assessment</code>, <code>thyroid_scan_interpretation</code></td></tr>
+        <tr><td>31</td><td><code>ophthalmology.py</code></td><td><code>ophthalmology_agent</code></td><td><code>vision_assessment</code>, <code>glaucoma_risk_assessment</code></td></tr>
+        <tr><td>32</td><td><code>pathology.py</code></td><td><code>pathology_agent</code></td><td><code>interpret_biopsy_result</code>, <code>critical_lab_value_alert</code></td></tr>
+        <tr><td>33</td><td><code>physical_medicine_rehab.py</code></td><td><code>physical_medicine_rehab_agent</code></td><td><code>functional_independence_assessment</code>, <code>stroke_rehabilitation_prognosis</code></td></tr>
+        <tr><td>34</td><td><code>radiation_oncology.py</code></td><td><code>radiation_oncology_agent</code></td><td><code>calculate_radiation_dose</code>, <code>radiation_toxicity_assessment</code></td></tr>
+        <tr><td>35</td><td><code>radiology.py</code></td><td><code>radiology_agent</code></td><td><code>imaging_study_selector</code>, <code>report_critical_findings</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s3-5">3.5 Hospital Operations (4 agents) <span class="badge">Sprints 1-3</span></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>File</th><th>Agent Variable</th><th>Role</th><th>Sprint</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>hospital_admission_agent.py</code></td>
+          <td><code>hospital_admission_agent_agent</code></td>
+          <td>Bed management, admissions, discharges, transfers, waitlists, ward visualisation</td>
+          <td>Existing</td>
+        </tr>
+        <tr>
+          <td><code>triage_nurse.py</code></td>
+          <td><code>triage_nurse_agent</code></td>
+          <td>ESI v4 triage scoring, vital signs, waiting queue management</td>
+          <td>Sprint 1</td>
+        </tr>
+        <tr>
+          <td><code>pharmacy.py</code></td>
+          <td><code>pharmacy_agent</code></td>
+          <td>Medication verification, dispensing, reconciliation, TTA prescriptions</td>
+          <td>Sprint 2</td>
+        </tr>
+        <tr>
+          <td><code>discharge_planning.py</code></td>
+          <td><code>discharge_planning_agent</code></td>
+          <td>Discharge readiness, summaries, GP letters, community referrals</td>
+          <td>Sprint 3</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr />
+
+  <!-- ════════ SECTION 4 ════════ -->
+  <h2 id="s4">4. Tool Inventory</h2>
+
+  <h3 id="s4-1">4.1 Common Tools — <code>tools/common_tools.py</code></h3>
+  <p>Available to <strong>every</strong> department agent (12 + 3 diagnostic functions):</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>get_patient_info(patient_id)</code></td><td>Retrieves full demographics, allergies, medications, conditions</td></tr>
+        <tr><td><code>record_vitals(patient_id, bp, hr, temp, spo2, ...)</code></td><td>Records vitals with automated clinical analysis and alert levels</td></tr>
+        <tr><td><code>check_drug_interactions(medications)</code></td><td>Checks known drug-drug interactions from an in-memory interaction DB</td></tr>
+        <tr><td><code>schedule_appointment(department, urgency, patient_id, reason)</code></td><td>Books follow-up with urgency-based triage (emergency/urgent/routine)</td></tr>
+        <tr><td><code>get_lab_results(patient_id, test_type)</code></td><td>Retrieves lab panels (CBC, BMP, LFTs, HbA1c, troponin, etc.)</td></tr>
+        <tr><td><code>generate_soap_note(patient_id, chief_complaint, ...)</code></td><td>Generates structured SOAP documentation at end of consultation</td></tr>
+        <tr><td><code>calculate_medication_dose(medication, weight_kg, age, ...)</code></td><td>Weight- and organ-function-adjusted dosing from a drug formulary</td></tr>
+        <tr><td><code>triage_assessment(symptoms, duration, severity)</code></td><td>Scores urgency (EMERGENCY/URGENT/ROUTINE) with department recommendation</td></tr>
+        <tr><td><code>record_patient_encounter(patient_id, department, ...)</code></td><td>Logs encounter to longitudinal patient history</td></tr>
+        <tr><td><code>get_patient_encounter_history(patient_id, last_n, ...)</code></td><td>Retrieves chronological visit history with cross-department context</td></tr>
+        <tr><td><code>request_mdt_consultation(patient_id, departments, ...)</code></td><td>Initiates multi-disciplinary team consultation for complex cases</td></tr>
+        <tr><td><code>generate_treatment_plan(patient_id, diagnosis, ...)</code></td><td>Generates structured evidence-based treatment plan</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s4-2">4.2 Monitoring Tools — <code>tools/monitoring_tools.py</code></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>check_critical_lab_values(patient_id)</code></td><td>Scans all lab results against AACC critical thresholds; returns ranked alerts</td></tr>
+        <tr><td><code>generate_deterioration_alert(patient_id, trigger, value, unit, context)</code></td><td>Generates a structured deterioration alert for a specific abnormal finding</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout info">
+    <strong>Coverage:</strong> 17 analytes across electrolytes, haematology, coagulation, cardiac, and liver panels.
+    5 vital sign parameters with critical/warning thresholds from AACC 2022 / Joint Commission standards.
+  </div>
+
+  <h3 id="s4-3">4.3 Image Analysis Tool — <code>tools/image_tools.py</code></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>analyze_medical_image(image_source, image_type, clinical_context, patient_id)</code></td><td>Multimodal AI analysis via <code>litellm.completion</code> with Gemini vision</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>Supported image types (13):</strong></p>
+  <div class="tag-list">
+    <span class="tag teal">skin_lesion</span><span class="tag teal">xray</span><span class="tag teal">mri</span>
+    <span class="tag teal">ct</span><span class="tag teal">ecg</span><span class="tag teal">wound</span>
+    <span class="tag teal">retinal</span><span class="tag teal">fundus</span><span class="tag teal">pathology_slide</span>
+    <span class="tag teal">ultrasound</span><span class="tag teal">pet_ct</span><span class="tag teal">bone_scan</span>
+    <span class="tag teal">general</span>
+  </div>
+  <p><strong>Input formats:</strong> File path, HTTPS URL, raw base64, or existing data URI.</p>
+
+  <h3 id="s4-4">4.4 Web Search Tool — <code>tools/websearch_tools.py</code></h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>web_search(query)</code></td><td>Real-time web search using browser-use + headless Chromium. Runs in daemon thread with 120 s timeout.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><strong>Returns:</strong> <code>{"status": "success"|"error"|"timeout", "query": ..., "result": ...}</code></p>
+
+  <h3 id="s4-5">4.5 Bed Management Tools — <code>tools/bed_management_tools.py</code></h3>
+  <p>Available to <strong><code>hospital_admission_agent_agent</code></strong> only (8 functions):</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>get_hospital_dashboard()</code></td><td>Returns full markdown table dashboard of all 20 wards with occupancy stats</td></tr>
+        <tr><td><code>get_ward_visualization(ward)</code></td><td>Returns ASCII floor-plan map for one ward with per-bed status icons</td></tr>
+        <tr><td><code>check_bed_availability(ward)</code></td><td>Returns available bed count and IDs for one or all wards</td></tr>
+        <tr><td><code>assign_bed(patient_id, ward, reason, priority)</code></td><td>Admits patient to first available bed; auto-waitlists if full</td></tr>
+        <tr><td><code>discharge_patient_from_bed(patient_id, discharge_notes)</code></td><td>Frees bed (→ cleaning), calculates length of stay, notifies waitlist</td></tr>
+        <tr><td><code>transfer_patient_bed(patient_id, target_ward, reason)</code></td><td>Inter-ward transfer: frees old bed, assigns new; full audit trail</td></tr>
+        <tr><td><code>add_to_waitlist(patient_id, ward, priority, reason)</code></td><td>Priority queue (emergency → urgent → routine) with estimated wait</td></tr>
+        <tr><td><code>get_waitlist_status(ward)</code></td><td>Returns current waitlist ordered by priority then arrival time</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s4-6">4.6 Triage Tools — <code>tools/triage_tools.py</code> <span class="badge">Sprint 1</span></h3>
+  <p>Available to <strong><code>triage_nurse_agent</code></strong> (3 functions):</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>calculate_esi_score(symptoms, vitals, pain_score, arrival_mechanism)</code></td><td>Calculates Emergency Severity Index v4 level (1-5) with colour, target time, and rationale</td></tr>
+        <tr><td><code>record_nurse_triage(patient_id, chief_complaint, vitals, pain_score, esi_level, ...)</code></td><td>Documents full nurse triage assessment including allergy verification and wristband flag</td></tr>
+        <tr><td><code>assign_waiting_priority(patient_id, esi_level)</code></td><td>Places patient in acuity queue; ESI 1-2 bypass waiting room to resuscitation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s4-7">4.7 Pharmacy Tools — <code>tools/pharmacy_tools.py</code> <span class="badge">Sprint 2</span></h3>
+  <p>Available to <strong><code>pharmacy_agent</code></strong> (4 functions):</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>verify_medication_order(patient_id, medication, dose, route, frequency, indication)</code></td><td>Validates against formulary, checks allergies, renal/hepatic adjustment, flags contraindications</td></tr>
+        <tr><td><code>dispense_medication(patient_id, medication, dose, quantity, instructions, pharmacist_id)</code></td><td>Records dispensing event with batch number, expiry, pharmacist sign-off</td></tr>
+        <tr><td><code>medication_reconciliation(patient_id, stage)</code></td><td>Compares home vs inpatient (admission) or inpatient vs discharge (discharge) medications</td></tr>
+        <tr><td><code>generate_tta_prescription(patient_id, discharge_medications, duration_days)</code></td><td>Generates Take-To-Away prescription with dosing instructions and warning signs</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s4-8">4.8 Discharge Planning Tools — <code>tools/discharge_tools.py</code> <span class="badge">Sprint 3</span></h3>
+  <p>Available to <strong><code>discharge_planning_agent</code></strong> (4 functions):</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>check_discharge_criteria(patient_id, clinical_criteria)</code></td><td>Validates discharge readiness (haemodynamically stable, pain controlled, mobile, etc.)</td></tr>
+        <tr><td><code>generate_discharge_summary(patient_id, admitting_diagnosis, final_diagnosis, ...)</code></td><td>Creates structured discharge summary with clinical course, investigations, treatment, TTA meds</td></tr>
+        <tr><td><code>send_gp_letter(patient_id, gp_name, summary, urgent_actions)</code></td><td>Generates and sends discharge letter to GP with key findings and follow-up plan</td></tr>
+        <tr><td><code>arrange_community_services(patient_id, services_required, clinical_reason, urgency)</code></td><td>Refers to district nursing, physiotherapy, OT, social work, palliative care, etc.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s4-9">4.9 Diagnostic Ordering — <code>tools/common_tools.py</code> <span class="badge">Sprint 4</span></h3>
+  <p>Available to <strong>all agents</strong> (3 new functions):</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>order_investigation(patient_id, investigation_type, clinical_indication, urgency)</code></td><td>Places investigation order with status tracking (ordered → processing → resulted → reviewed)</td></tr>
+        <tr><td><code>get_pending_results(patient_id, status_filter)</code></td><td>Returns all ordered investigations with current status and turnaround times</td></tr>
+        <tr><td><code>acknowledge_critical_result(patient_id, investigation_id, clinician_id, notes)</code></td><td>Records clinician acknowledgment of critical result, closing the notification loop</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout info">
+    <strong>Supported investigation types:</strong> blood_panel, lipid_panel, liver_function, renal_function, cardiac_enzymes, coagulation, inflammation, thyroid, hba1c, blood_culture, urine_culture, chest_xray, ct_chest, ct_abdomen, ct_head, mri_brain, mri_spine, ecg, echocardiogram, ultrasound_abddoment, doppler
+  </div>
+
+  <h3 id="s4-10">4.10 Specialty Tools — <code>tools/{specialty}_tools.py</code></h3>
+  <p><strong>35 files × 2 functions = 70 specialty tool functions total.</strong></p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Department</th><th>Tool 1</th><th>Tool 2</th></tr></thead>
+      <tbody>
+        <tr><td>allergy_immunology</td><td><code>allergy_skin_test_interpretation</code></td><td><code>immunodeficiency_risk_assessment</code></td></tr>
+        <tr><td>anesthesiology</td><td><code>asa_physical_status_classification</code></td><td><code>calculate_anesthesia_risk</code></td></tr>
+        <tr><td>cardiology</td><td><code>analyze_ecg</code></td><td><code>assess_cardiac_risk</code></td></tr>
+        <tr><td>cardiothoracic_surgery</td><td><code>cardiac_surgery_risk_score</code></td><td><code>thoracic_surgery_feasibility</code></td></tr>
+        <tr><td>colorectal_surgery</td><td><code>colorectal_cancer_screening</code></td><td><code>bowel_obstruction_assessment</code></td></tr>
+        <tr><td>critical_care</td><td><code>calculate_severity_score</code></td><td><code>organ_dysfunction_assessment</code></td></tr>
+        <tr><td>dermatology</td><td><code>skin_lesion_analysis</code></td><td><code>allergy_patch_test_interpretation</code></td></tr>
+        <tr><td>emergency_medicine</td><td><code>chest_pain_risk_stratification</code></td><td><code>trauma_triage_assessment</code></td></tr>
+        <tr><td>endocrinology</td><td><code>diabetes_management_assessment</code></td><td><code>thyroid_nodule_assessment</code></td></tr>
+        <tr><td>ent</td><td><code>hearing_assessment</code></td><td><code>sleep_apnea_screening</code></td></tr>
+        <tr><td>gastroenterology</td><td><code>liver_function_assessment</code></td><td><code>ibs_symptom_scoring</code></td></tr>
+        <tr><td>general_medicine</td><td><code>bmi_calculator</code></td><td><code>vaccination_schedule</code></td></tr>
+        <tr><td>general_surgery</td><td><code>appendicitis_scoring</code></td><td><code>surgical_risk_assessment</code></td></tr>
+        <tr><td>gynecology</td><td><code>pregnancy_risk_assessment</code></td><td><code>menstrual_cycle_analysis</code></td></tr>
+        <tr><td>hematology</td><td><code>anemia_classification</code></td><td><code>dvt_risk_assessment</code></td></tr>
+        <tr><td>infectious_diseases</td><td><code>sepsis_screening</code></td><td><code>antibiotic_selection_guide</code></td></tr>
+        <tr><td>nephrology</td><td><code>calculate_gfr</code></td><td><code>assess_kidney_stage</code></td></tr>
+        <tr><td>neurology</td><td><code>assess_stroke_risk</code></td><td><code>evaluate_consciousness</code></td></tr>
+        <tr><td>neurosurgery</td><td><code>intracranial_pressure_assessment</code></td><td><code>spinal_cord_injury_assessment</code></td></tr>
+        <tr><td>nuclear_medicine</td><td><code>pet_ct_oncology_assessment</code></td><td><code>thyroid_scan_interpretation</code></td></tr>
+        <tr><td>oncology</td><td><code>cancer_screening_recommendation</code></td><td><code>staging_assessment</code></td></tr>
+        <tr><td>ophthalmology</td><td><code>vision_assessment</code></td><td><code>glaucoma_risk_assessment</code></td></tr>
+        <tr><td>orthopedics</td><td><code>fracture_risk_assessment</code></td><td><code>joint_mobility_score</code></td></tr>
+        <tr><td>pathology</td><td><code>interpret_biopsy_result</code></td><td><code>critical_lab_value_alert</code></td></tr>
+        <tr><td>pediatrics</td><td><code>pediatric_growth_assessment</code></td><td><code>vaccination_tracker</code></td></tr>
+        <tr><td>physical_medicine_rehab</td><td><code>functional_independence_assessment</code></td><td><code>stroke_rehabilitation_prognosis</code></td></tr>
+        <tr><td>plastic_surgery</td><td><code>burn_assessment</code></td><td><code>reconstructive_planning</code></td></tr>
+        <tr><td>psychology</td><td><code>phq9_depression_screening</code></td><td><code>gad7_anxiety_screening</code></td></tr>
+        <tr><td>pulmonology</td><td><code>spirometry_interpretation</code></td><td><code>asthma_control_score</code></td></tr>
+        <tr><td>radiation_oncology</td><td><code>calculate_radiation_dose</code></td><td><code>radiation_toxicity_assessment</code></td></tr>
+        <tr><td>radiology</td><td><code>imaging_study_selector</code></td><td><code>report_critical_findings</code></td></tr>
+        <tr><td>rheumatology</td><td><code>arthritis_assessment</code></td><td><code>lupus_activity_assessment</code></td></tr>
+        <tr><td>thoracic_surgery</td><td><code>pulmonary_function_surgical_risk</code></td><td><code>pleural_disease_assessment</code></td></tr>
+        <tr><td>urology</td><td><code>kidney_stone_assessment</code></td><td><code>prostate_assessment</code></td></tr>
+        <tr><td>vascular_surgery</td><td><code>peripheral_arterial_disease_assessment</code></td><td><code>aortic_aneurysm_assessment</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s4-7">4.7 Tool Count Summary</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Category</th><th>File</th><th>Functions</th><th>Available To</th></tr></thead>
+      <tbody>
+        <tr><td>Common</td><td><code>common_tools.py</code></td><td>12 + 3 (diagnostic ordering)</td><td>All 35 department agents</td></tr>
+        <tr><td>Monitoring</td><td><code>monitoring_tools.py</code></td><td>2</td><td>All 35 department agents</td></tr>
+        <tr><td>Image analysis</td><td><code>image_tools.py</code></td><td>1</td><td>Selected departments + coordinator</td></tr>
+        <tr><td>Web search</td><td><code>websearch_tools.py</code></td><td>1</td><td>All 35 department agents</td></tr>
+        <tr><td>Bed management</td><td><code>bed_management_tools.py</code></td><td>8</td><td><code>hospital_admission_agent_agent</code> only</td></tr>
+        <tr><td>Specialty (×35)</td><td><code>{dept}_tools.py</code></td><td>70</td><td>2 per department agent</td></tr>
+        <tr style="font-weight:700;background:#e3edf7"><td>Total unique</td><td>46 files</td><td>101 functions</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>Per department agent tool count: 17</strong><br/>
+    12 common + 2 monitoring + 2 specialty + 1 image + 1 web search
+    (some departments omit image tools where clinically irrelevant)
+  </div>
+
+  <hr />
+
+  <!-- ════════ SECTION 5 ════════ -->
+  <h2 id="s5">5. Patient &amp; Lab Database</h2>
+
+  <h3>5.1 Patient Registry — <code>_PATIENT_DB</code> in <code>common_tools.py</code></h3>
+  <p>10 diverse mock patients (P001–P010) with realistic comorbidities, medications, and allergies:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Key Conditions</th><th>Current Ward</th></tr></thead>
+      <tbody>
+        <tr><td><code>P001</code></td><td>John Smith</td><td>55M</td><td>Hypertension, T2DM</td><td>General_Medicine</td></tr>
+        <tr><td><code>P002</code></td><td>Sarah Johnson</td><td>34F</td><td>PCOS, Iron-deficiency anaemia</td><td>Gynecology</td></tr>
+        <tr><td><code>P003</code></td><td>Robert Chen</td><td>68M</td><td>COPD GOLD II, AFib, CHF (EF 40%)</td><td>ICU</td></tr>
+        <tr><td><code>P004</code></td><td>Emily Davis</td><td>28F</td><td>Migraines</td><td>Neurology</td></tr>
+        <tr><td><code>P005</code></td><td>Michael Brown</td><td>45M</td><td>L4-L5 disc herniation, GAD</td><td>Orthopedics</td></tr>
+        <tr><td><code>P006</code></td><td>Margaret Wilson</td><td>68F</td><td>COPD GOLD III, Osteoporosis, MDD, GERD</td><td>Pulmonology</td></tr>
+        <tr><td><code>P007</code></td><td>Carlos Rivera</td><td>34M</td><td>T1DM (since age 12), Diabetic retinopathy</td><td>Not admitted</td></tr>
+        <tr><td><code>P008</code></td><td>Linda Park</td><td>55F</td><td>SLE, Lupus Nephritis Class III, HTN</td><td>Nephrology</td></tr>
+        <tr><td><code>P009</code></td><td>Andre Williams</td><td>45M</td><td>HIV-1 (undetectable), GAD, HBV co-infection</td><td>Infectious_Diseases</td></tr>
+        <tr><td><code>P010</code></td><td>George Thompson</td><td>72M</td><td>Post-CABG, Persistent AFib, HF (EF 35%), CKD 3b, T2DM</td><td>Cardiology</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>5.2 Lab Database</h3>
+  <p>Full panels available for all 10 patients including: CBC, BMP (electrolytes, renal, glucose), Lipid Panel, HbA1c, LFTs, TSH, coagulation (INR/PT), iron studies, hormone panels, troponin, BNP, urinalysis, blood cultures, and specialty panels.</p>
+
+  <h3>5.3 Drug Interaction Database</h3>
+  <p>In-memory lookup of known clinically significant drug-drug interactions checked before any new medication is recommended (<code>_DRUG_INTERACTIONS</code> in <code>common_tools.py</code>).</p>
+
+  <h3>5.4 Drug Formulary</h3>
+  <p>Dosing reference for common medications with weight- and organ-function-adjusted calculations used by <code>calculate_medication_dose</code> (<code>_DRUG_FORMULARY</code> in <code>common_tools.py</code>).</p>
+
+  <hr />
+
+  <!-- ════════ SECTION 6 ════════ -->
+  <h2 id="s6">6. Hospital Infrastructure — Bed Management System</h2>
+
+  <h3>6.1 Overview</h3>
+  <p>Added in the most recent implementation sprint. Provides a full simulation of hospital inpatient operations with real-time state tracking, ASCII ward maps, and a markdown hospital dashboard.</p>
+
+  <h3 id="s6-2">6.2 Ward Inventory</h3>
+  <div class="callout">
+    <strong>20 inpatient wards | 325 total beds | 215 occupied (66%) at baseline</strong>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Ward</th><th>Beds</th><th>Type</th><th>Floor</th><th>Baseline Occupancy</th></tr></thead>
+      <tbody>
+        <tr><td>ICU</td><td>10</td><td>intensive_care</td><td>2</td><td>60%</td></tr>
+        <tr><td>Emergency</td><td>15</td><td>emergency</td><td>1</td><td>67%</td></tr>
+        <tr><td>Cardiology</td><td>20</td><td>general</td><td>4</td><td>70%</td></tr>
+        <tr><td>Neurology</td><td>16</td><td>general</td><td>5</td><td>63%</td></tr>
+        <tr><td>Oncology</td><td>20</td><td>general</td><td>6</td><td>75%</td></tr>
+        <tr><td>General_Medicine</td><td>30</td><td>general</td><td>3</td><td>67%</td></tr>
+        <tr><td>Psychiatry</td><td>15</td><td>psychiatric</td><td>7</td><td>67%</td></tr>
+        <tr><td>Pediatrics</td><td>20</td><td>pediatric</td><td>3</td><td>60%</td></tr>
+        <tr><td>Orthopedics</td><td>20</td><td>surgical</td><td>4</td><td>60%</td></tr>
+        <tr><td>General_Surgery</td><td>18</td><td>surgical</td><td>4</td><td>67%</td></tr>
+        <tr><td>Gynecology</td><td>15</td><td>general</td><td>5</td><td>67%</td></tr>
+        <tr><td>Nephrology</td><td>14</td><td>general</td><td>6</td><td>64%</td></tr>
+        <tr><td>Pulmonology</td><td>18</td><td>general</td><td>3</td><td>67%</td></tr>
+        <tr><td>Gastroenterology</td><td>16</td><td>general</td><td>3</td><td>63%</td></tr>
+        <tr><td>Infectious_Diseases</td><td>12</td><td>isolation</td><td>2</td><td>67%</td></tr>
+        <tr><td>Neurosurgery</td><td>12</td><td>surgical</td><td>5</td><td>67%</td></tr>
+        <tr><td>Cardiothoracic_Surgery</td><td>10</td><td>surgical</td><td>2</td><td>70%</td></tr>
+        <tr><td>Hematology</td><td>14</td><td>general</td><td>6</td><td>64%</td></tr>
+        <tr><td>Rehabilitation</td><td>20</td><td>rehab</td><td>7</td><td>70%</td></tr>
+        <tr><td>Vascular_Surgery</td><td>10</td><td>surgical</td><td>4</td><td>70%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout warn">
+    Outpatient-only services (Radiology, Pathology, Nuclear Medicine, Anaesthesiology, Radiation Oncology) have no inpatient ward.
+  </div>
+
+  <h3 id="s6-3">6.3 Bed States</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Status</th><th>Icon</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>available</code></td><td>🟢</td><td>Ready for new admission</td></tr>
+        <tr><td><code>occupied</code></td><td>🔴</td><td>Patient currently in bed</td></tr>
+        <tr><td><code>cleaning</code></td><td>🟡</td><td>Post-discharge housekeeping (~15 min turnover)</td></tr>
+        <tr><td><code>maintenance</code></td><td>🔧</td><td>Out of service — engineering review</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s6-4">6.4 Visualisation Examples</h3>
+  <p><strong>Hospital Dashboard</strong> (from <code>get_hospital_dashboard()</code>):</p>
+  <pre>## 🏥 AGENTIC HOSPITAL — BED MANAGEMENT DASHBOARD
+Date: 2026-02-20 14:35  |  Total Capacity: 325  |  Occupied: 215  |  Available: 78  |  Occupancy: 66%
+
+| Ward                      | Capacity | 🔴 Occupied | 🟡 Cleaning | 🔧 Maint | 🟢 Available | Occ%    |
+|---------------------------|----------|-------------|-------------|----------|--------------|---------|
+| ICU                       |    10    |      6      |      1      |    1     |      2       |   60%   |
+| Emergency                 |    15    |     10      |      2      |    0     |      3       |   67%   |
+| Cardiology                |    20    |     14      |      2      |    0     |      4       |   70%   |
+| ...</pre>
+
+  <p><strong>Ward Floor Plan</strong> (from <code>get_ward_visualization("ICU")</code>):</p>
+  <pre>╔══════════════════════════════════════════════════════════════════╗
+║  🏥 ICU Ward — Agentic Hospital                                  ║
+║  Floor 2 | Nurse Station: ICU Central                            ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Beds: 10 total | 🔴 6 occupied | 🟡 1 cleaning | 🟢 2 available ║
+╠══════════════════════════════════════════════════════════════════╣
+║  [ICU-01] 🔴 OCCUPIED   │ Robert Chen                           ║
+║                          │ Dx: COPD exacerbation + CHF           ║
+║                          │ Admitted: 2026-02-18 08:30            ║
+╠══════════════════════════════════════════════════════════════════╣
+║  [ICU-02] 🔴 OCCUPIED   │ George Thompson                       ║
+║                          │ Dx: Decompensated HF + Persistent AFib║
+╠══════════════════════════════════════════════════════════════════╣
+║  [ICU-07] 🟡 CLEANING   │ Post-discharge cleaning — ready ~15min║
+╠══════════════════════════════════════════════════════════════════╣
+║  [ICU-08] 🟢 AVAILABLE  │ Ready for admission                   ║
+╚══════════════════════════════════════════════════════════════════╝
+  Occupancy: 6/10  |  Available now: 2</pre>
+
+  <h3 id="s6-5">6.5 Admission Workflow (simulated)</h3>
+  <pre>Query: "Admit patient P007 to Cardiology for diabetic monitoring"
+  ↓
+coordinator → hospital_admission_agent_agent
+  ↓
+1. get_patient_info("P007")             → Carlos Rivera, T1DM, allergic to amoxicillin
+2. check_bed_availability("Cardiology") → 4 beds available
+3. assign_bed("P007", "Cardiology", ...) → CARD-17 assigned
+4. get_ward_visualization("Cardiology") → updated floor map shown</pre>
+
+  <h3>6.6 Waitlist Priority</h3>
+  <pre>Priority queue per ward:
+  emergency (0) → immediate — life-threatening, ICU-level
+  urgent    (1) → within 24h — significant illness
+  routine   (2) → elective — stable or scheduled
+
+Estimated wait: 30 min base + 45 min per patient ahead in queue</pre>
+
+  <hr />
+
+  <!-- ════════ SECTION 7 ════════ -->
+  <h2 id="s7">7. Clinical Reasoning Framework</h2>
+  <p>Every department agent prompt embeds four shared constants from <code>prompts/shared.py</code>:</p>
+
+  <div class="section-card">
+    <h4>_TOOL_PROTOCOL — 9-Step Ordered Sequence</h4>
+    <ol>
+      <li><code>get_patient_info</code> — call first when patient_id available</li>
+      <li><code>get_lab_results</code> — before assessment</li>
+      <li><code>record_vitals</code> — on any reported vitals</li>
+      <li><code>check_drug_interactions</code> — before recommending any medication</li>
+      <li><code>web_search</code> — for post-training-cutoff guidelines or novel presentations</li>
+      <li><code>analyze_medical_image</code> — immediately on any shared image</li>
+      <li><code>calculate_medication_dose</code> — before specifying any dosing</li>
+      <li><code>generate_soap_note</code> — at end of every consultation</li>
+      <li><code>schedule_appointment</code> — urgency-based follow-up booking</li>
+    </ol>
+  </div>
+
+  <div class="section-card">
+    <h4>_IMAGE_ANALYSIS_WORKFLOW</h4>
+    <p>Protocol for multimodal inputs: immediate tool invocation, no text description first, 13 supported image types, critical finding escalation rules (STEMI pattern, midline shift, retinal detachment, PE).</p>
+  </div>
+
+  <div class="section-card">
+    <h4>_CLINICAL_REASONING — 3-Step Framework</h4>
+    <ul>
+      <li><strong>Step 1</strong> — Think before responding: most dangerous Dx, most likely Dx, missing info, bias risk</li>
+      <li><strong>Step 2</strong> — Cognitive bias checklist: anchoring, availability, premature closure, framing, demographic</li>
+      <li><strong>Step 3</strong> — Structured output: Clinical Impression → Differential (with likelihood) → Confidence Level → Workup → Management Plan → Red Flags → Follow-up</li>
+    </ul>
+  </div>
+
+  <div class="section-card">
+    <h4>_SAFETY_DISCLAIMER</h4>
+    <p>Appended to every agent prompt: AI decision-support only, not a licensed clinician, in-person evaluation required for all significant presentations.</p>
+  </div>
+
+  <hr />
+
+  <!-- ════════ SECTION 8 ════════ -->
+  <h2 id="s8">8. Prompt Architecture</h2>
+
+  <h3>Structure</h3>
+  <p>Each department prompt follows this template:</p>
+  <pre>You are Dr. {Name}AI, a {Department} Specialist at Agentic Hospital.
+
+PERSONA &amp; PHILOSOPHY:   [fellowship training, clinical philosophy]
+EXPERTISE:              [15–20 specialty conditions/procedures]
+CLINICAL APPROACH:
+  ► KEY HISTORY QUESTIONS:    [department-specific intake questions]
+  ► VALIDATED SCORING SYSTEMS:[5–8 validated clinical scores]
+  ► EVIDENCE-BASED GUIDELINES:[5+ major society guideline citations]
+  ► DIAGNOSTIC PITFALLS:      [5–8 specialty-specific cognitive traps]
+EMERGENCY RED FLAGS:    [4–6 critical presentations requiring 911]
+
+{_TOOL_PROTOCOL}
+{_IMAGE_ANALYSIS_WORKFLOW}
+{_CLINICAL_REASONING}
+{_SAFETY_DISCLAIMER}</pre>
+
+  <h3>Prompt Files</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Location</th><th>File</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td><code>prompts/shared.py</code></td><td>Shared constants</td><td><code>_SAFETY_DISCLAIMER</code>, <code>_TOOL_PROTOCOL</code>, <code>_IMAGE_ANALYSIS_WORKFLOW</code>, <code>_CLINICAL_REASONING</code></td></tr>
+        <tr><td><code>prompts/coordinator.py</code></td><td>Coordinator prompt</td><td><code>COORDINATOR_INSTRUCTION</code> (4-phase: Registration → Triage → Routing → Pharmacy)</td></tr>
+        <tr><td><code>prompts/hospital_admission_agent.py</code></td><td>Admission agent prompt</td><td><code>HOSPITAL_ADMISSION_INSTRUCTION</code></td></tr>
+        <tr><td><code>prompts/{dept}.py</code> (×35)</td><td>Department prompts</td><td><code>{DEPT_UPPER}_INSTRUCTION</code></td></tr>
+        <tr><td><code>prompts/department_prompts.py</code></td><td>Backward-compat shim</td><td>Re-exports all constants</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr />
+
+  <!-- ════════ SECTION 9 ════════ -->
+  <h2 id="s9">9. File Structure</h2>
+  <pre>agentic_hospital/
+├── __init__.py                         exports root_agent
+├── agent.py                            root coordinator + 36 sub-agent registration
+│
+├── departments/                        36 agent definitions
+│   ├── allergy_immunology.py
+│   ├── anesthesiology.py
+│   ├── cardiology.py
+│   ├── cardiothoracic_surgery.py
+│   ├── colorectal_surgery.py
+│   ├── critical_care.py
+│   ├── dermatology.py
+│   ├── emergency_medicine.py
+│   ├── endocrinology.py
+│   ├── ent.py
+│   ├── gastroenterology.py
+│   ├── general_medicine.py
+│   ├── general_surgery.py
+│   ├── gynecology.py
+│   ├── hematology.py
+│   ├── hospital_admission_agent.py           ← bed management agent
+│   ├── infectious_diseases.py
+│   ├── nephrology.py
+│   ├── neurology.py
+│   ├── neurosurgery.py
+│   ├── nuclear_medicine.py
+│   ├── oncology.py
+│   ├── ophthalmology.py
+│   ├── orthopedics.py
+│   ├── pathology.py
+│   ├── pediatrics.py
+│   ├── physical_medicine_rehab.py
+│   ├── plastic_surgery.py
+│   ├── psychology.py
+│   ├── pulmonology.py
+│   ├── radiation_oncology.py
+│   ├── radiology.py
+│   ├── rheumatology.py
+│   ├── thoracic_surgery.py
+│   ├── urology.py
+│   └── vascular_surgery.py
+│
+├── prompts/                            37 prompt files
+│   ├── shared.py                       _TOOL_PROTOCOL, _CLINICAL_REASONING, etc.
+│   ├── coordinator.py
+│   ├── hospital_admission_agent.py
+│   ├── department_prompts.py           backward-compat re-export shim
+│   └── {dept}.py × 35
+│
+└── tools/                             46 tool files, 101 functions total
+    ├── common_tools.py                 12 shared functions + _PATIENT_DB + _LAB_DB + diagnostic ordering
+    ├── monitoring_tools.py             2 critical alert functions
+    ├── image_tools.py                  1 multimodal analysis function
+    ├── websearch_tools.py              1 browser-use search function
+    ├── bed_management_tools.py         8 bed management functions + _BED_DB
+    ├── triage_tools.py                 3 ESI v4 triage functions
+    ├── pharmacy_tools.py               4 medication verification/dispensing functions
+    ├── discharge_tools.py              4 discharge planning functions
+    ├── knowledge_base/
+    │   └── __init__.py                 (placeholder — KB not yet implemented)
+    └── {dept}_tools.py × 35           70 specialty functions (2 per department)</pre>
+
+  <hr />
+
+  <!-- ════════ SECTION 10 ════════ -->
+  <h2 id="s10">10. Dependencies</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Package</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>google-adk</code></td><td>Google Agent Development Kit — agent/sub-agent framework, ADK web UI</td></tr>
+        <tr><td><code>python-dotenv</code></td><td>.env loading (<code>GOOGLE_API_KEY</code>)</td></tr>
+        <tr><td><code>browser-use</code></td><td>Browser automation for real-time web search (headless Chromium)</td></tr>
+        <tr><td><code>langchain-google-genai</code></td><td>Gemini LLM for browser-use agent</td></tr>
+        <tr><td><code>litellm</code></td><td>Model routing — all agents use <code>openrouter/google/gemini-2.5-flash-lite</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>Environment variables required (<code>.env</code>):</strong></p>
+  <pre>GOOGLE_API_KEY=your_key_here</pre>
+
+  <p><strong>Browser dependency:</strong></p>
+  <pre>playwright install chromium   # required for web_search tool</pre>
+
+  <hr />
+
+  <!-- ════════ SECTION 11 ════════ -->
+  <h2 id="s11">11. Running the System</h2>
+  <pre># Install dependencies
+pip install -r requirements.txt
+playwright install chromium
+
+# Launch ADK web UI
+adk web
+
+# Opens at http://localhost:8000
+# Select "hospital_coordinator" from the agent dropdown</pre>
+
+  <h3>Example Interactions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Query</th><th>Routes To</th><th>Tools Called</th></tr></thead>
+      <tbody>
+        <tr><td>"I have chest pain radiating to my left arm"</td><td><code>cardiology_agent</code></td><td><code>triage_assessment</code> → <code>analyze_ecg</code> → <code>assess_cardiac_risk</code></td></tr>
+        <tr><td>"Show me the hospital bed dashboard"</td><td><code>hospital_admission_agent_agent</code></td><td><code>get_hospital_dashboard</code></td></tr>
+        <tr><td>"Admit patient P007 to Cardiology"</td><td><code>hospital_admission_agent_agent</code></td><td><code>get_patient_info</code> → <code>check_bed_availability</code> → <code>assign_bed</code> → <code>get_ward_visualization</code></td></tr>
+        <tr><td>"Show me the ICU ward map"</td><td><code>hospital_admission_agent_agent</code></td><td><code>get_ward_visualization("ICU")</code></td></tr>
+        <tr><td>"Discharge patient P003"</td><td><code>hospital_admission_agent_agent</code></td><td><code>discharge_patient_from_bed</code> → <code>get_ward_visualization</code></td></tr>
+        <tr><td>"Transfer P010 from Cardiology to ICU"</td><td><code>hospital_admission_agent_agent</code></td><td><code>transfer_patient_bed</code> → <code>get_ward_visualization</code> ×2</td></tr>
+        <tr><td>"What are the latest COPD guidelines?"</td><td><code>pulmonology_agent</code></td><td><code>web_search</code> → <code>spirometry_interpretation</code></td></tr>
+        <tr><td>[skin photo attached]</td><td><code>dermatology_agent</code></td><td><code>analyze_medical_image</code> → <code>skin_lesion_analysis</code></td></tr>
+        <tr><td>"P003 has potassium of 6.8 — critical?"</td><td>coordinator / <code>nephrology_agent</code></td><td><code>check_critical_lab_values</code> → <code>generate_deterioration_alert</code></td></tr>
+        <tr><td>"P005, P002, and P008 need MDT review"</td><td>coordinator</td><td><code>request_mdt_consultation</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr />
+
+  <!-- ════════ SECTION 12 ════════ -->
+  <h2 id="s12">12. What's Next</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>38 specialist agents</td><td><span class="tag done">✅ Complete</span></td><td>35 medical + 4 operations (admission, triage, pharmacy, discharge)</td></tr>
+        <tr><td>101 tool functions</td><td><span class="tag done">✅ Complete</span></td><td>Across 46 tool files</td></tr>
+        <tr><td>Bed management system</td><td><span class="tag done">✅ Complete</span></td><td>20 wards, 325 beds, visualisation</td></tr>
+        <tr><td>Patient &amp; lab mock data</td><td><span class="tag done">✅ Complete</span></td><td>P001–P010, full panels</td></tr>
+        <tr><td>Multimodal image analysis</td><td><span class="tag done">✅ Complete</span></td><td>13 image types</td></tr>
+        <tr><td>Web search (real-time)</td><td><span class="tag done">✅ Complete</span></td><td>browser-use + Chromium</td></tr>
+        <tr><td>Critical lab monitoring</td><td><span class="tag done">✅ Complete</span></td><td>AACC thresholds, AACC 2022</td></tr>
+        <tr><td>MDT consultation</td><td><span class="tag done">✅ Complete</span></td><td>Cross-department coordination</td></tr>
+        <tr><td>Longitudinal encounter history</td><td><span class="tag done">✅ Complete</span></td><td>Per-patient visit log</td></tr>
+        <tr><td>SOAP note generation</td><td><span class="tag done">✅ Complete</span></td><td>Structured clinical documentation</td></tr>
+        <tr><td>Triage Nurse Agent (ESI v4)</td><td><span class="tag done">✅ Sprint 1</span></td><td>ESI scoring, vital signs, waiting queue</td></tr>
+        <tr><td>Pharmacy Agent</td><td><span class="tag done">✅ Sprint 2</span></td><td>Medication verification, dispensing, reconciliation</td></tr>
+        <tr><td>Discharge Planning Agent</td><td><span class="tag done">✅ Sprint 3</span></td><td>Discharge summaries, GP letters, community referrals</td></tr>
+        <tr><td>Diagnostic Ordering</td><td><span class="tag done">✅ Sprint 4</span></td><td>Order → processing → resulted → reviewed workflow</td></tr>
+        <tr><td>Specialty knowledge base</td><td><span class="tag plan">🔲 Planned</span></td><td>Per-department structured KB with clinical guidelines, drug reference, scoring systems</td></tr>
+        <tr><td>Radiology order &amp; reporting agent</td><td><span class="tag plan">🔲 Planned</span></td><td>Imaging queue, report generation</td></tr>
+        <tr><td>Theatre scheduling agent</td><td><span class="tag plan">🔲 Planned</span></td><td>Surgical booking, anaesthetic pre-assessment</td></tr>
+        <tr><td>Discharge planning agent</td><td><span class="tag plan">🔲 Planned</span></td><td>Community referrals, follow-up coordination</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:60px; padding-top:20px; border-top:1px solid var(--border); color:var(--muted); font-size:12px; text-align:center;">
+    Agentic Hospital — Implementation Report &nbsp;·&nbsp; Generated 2026-02-20 &nbsp;·&nbsp; Google ADK · Gemini 2.5 Flash Lite
+  </div>
+
+</main>
+</div>
+
+<script>
+  // Initialise Mermaid with a theme that matches our colour scheme
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#ddeef8',
+      primaryTextColor: '#0d2137',
+      primaryBorderColor: '#2a5a7c',
+      lineColor: '#2a5a7c',
+      secondaryColor: '#d4eddb',
+      tertiaryColor: '#e8e0f4',
+      background: '#ffffff',
+      mainBkg: '#ddeef8',
+      nodeBorder: '#2a5a7c',
+      clusterBkg: '#f0f7fb',
+      clusterBorder: '#4a8fa8',
+      titleColor: '#0d2137',
+      edgeLabelBackground: '#ffffff',
+      fontFamily: 'Segoe UI, system-ui, sans-serif',
+      fontSize: '13px',
+    },
+    flowchart: {
+      curve: 'basis',
+      htmlLabels: true,
+      padding: 15,
+    }
+  });
+</script>
+</body>
+</html>

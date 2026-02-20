@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hospital Agent Orchestration Architecture</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-elevated: #0b1020;
+      --card: #111827;
+      --accent: #4f46e5;
+      --accent-soft: rgba(79, 70, 229, 0.18);
+      --accent-strong: rgba(79, 70, 229, 0.32);
+      --accent-2: #06b6d4;
+      --text-main: #e5e7eb;
+      --text-soft: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --radius-lg: 18px;
+      --radius-xl: 26px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.85);
+      --blur-glass: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Inter", sans-serif;
+      color: var(--text-main);
+      background: radial-gradient(circle at top left, #1e293b 0, #020617 52%, #020617 100%);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .architecture-shell {
+      position: relative;
+      padding: 28px 28px 24px;
+      border-radius: 32px;
+      background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.12), rgba(15, 23, 42, 0.94));
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(12px) scale(0.99);
+      animation: arch-shell-in 520ms cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    }
+
+    .architecture-shell::before,
+    .architecture-shell::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(38px);
+      opacity: 0.7;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      animation: arch-orb-breathe 6800ms ease-in-out infinite alternate;
+    }
+
+    .architecture-shell::before {
+      width: 260px;
+      height: 260px;
+      top: -120px;
+      right: -80px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.8), transparent 70%);
+    }
+
+    .architecture-shell::after {
+      width: 220px;
+      height: 220px;
+      bottom: -120px;
+      left: -60px;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.8), transparent 72%);
+    }
+
+    .arch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .arch-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .arch-title {
+      font-size: 22px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .arch-title-pill {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, rgba(79, 70, 229, 0.15), rgba(56, 189, 248, 0.06));
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      color: #c7d2fe;
+    }
+
+    .arch-subtitle {
+      font-size: 13px;
+      color: var(--text-soft);
+      max-width: 520px;
+    }
+
+    .arch-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .arch-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--text-soft);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      backdrop-filter: blur(18px);
+    }
+
+    .arch-tag-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+    }
+
+    .arch-tag-dot.common {
+      background: #38bdf8;
+    }
+
+    .arch-tag-dot.special {
+      background: #22c55e;
+    }
+
+    .arch-tag-dot.image {
+      background: #facc15;
+    }
+
+    .arch-tag-dot.web {
+      background: #f97316;
+    }
+
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) 260px;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .arch-column {
+      position: relative;
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+      padding: 16px 14px 14px;
+      backdrop-filter: blur(var(--blur-glass));
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: arch-col-in 620ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .arch-column:nth-child(1) { animation-delay: 80ms; }
+    .arch-column:nth-child(2) { animation-delay: 160ms; }
+    .arch-column:nth-child(3) { animation-delay: 240ms; }
+
+    .arch-column.primary {
+      border-color: rgba(129, 140, 248, 0.85);
+      box-shadow: 0 22px 55px rgba(79, 70, 229, 0.55);
+    }
+
+    .arch-col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .arch-col-title {
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #a5b4fc;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .arch-col-subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .arch-node {
+      position: relative;
+      border-radius: var(--radius-lg);
+      padding: 10px 11px;
+      margin-bottom: 8px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.92));
+      border: 1px solid rgba(47, 60, 98, 0.9);
+      overflow: hidden;
+      cursor: default;
+      transform-origin: center;
+      animation: arch-node-pop 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      animation-delay: 260ms;
+      transition: transform 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out;
+    }
+
+    .arch-node:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.95);
+      border-color: rgba(129, 140, 248, 0.8);
+    }
+
+    .arch-node.main {
+      border-color: rgba(79, 70, 229, 0.85);
+      box-shadow: 0 18px 35px rgba(79, 70, 229, 0.6);
+    }
+
+    .arch-node::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.2), transparent 60%);
+      opacity: 0;
+      transition: opacity 220ms ease-out;
+    }
+
+    .arch-node:hover::before {
+      opacity: 1;
+    }
+
+    .arch-node-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .arch-node-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      background: radial-gradient(circle at 30% 0, rgba(129, 140, 248, 0.8), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(129, 140, 248, 0.7);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.9);
+    }
+
+    .arch-node.main .arch-node-icon {
+      background: radial-gradient(circle at 30% 0, rgba(56, 189, 248, 0.9), rgba(15, 23, 42, 0.98));
+      border-color: rgba(56, 189, 248, 0.85);
+    }
+
+    .arch-node-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .arch-node-meta {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .arch-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .arch-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      color: var(--text-soft);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .arch-badge.accent {
+      border-color: rgba(129, 140, 248, 0.85);
+      color: #c7d2fe;
+      background: linear-gradient(120deg, rgba(79, 70, 229, 0.3), rgba(56, 189, 248, 0.12));
+    }
+
+    .arch-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .arch-tool-pill {
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--text-soft);
+    }
+
+    .arch-tool-pill.common {
+      border-color: rgba(56, 189, 248, 0.8);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e0f2fe;
+    }
+
+    .arch-tool-pill.special {
+      border-color: rgba(34, 197, 94, 0.8);
+      color: #bbf7d0;
+    }
+
+    .arch-tool-pill.image {
+      border-color: rgba(250, 204, 21, 0.9);
+      color: #fef9c3;
+    }
+
+    .arch-tool-pill.web {
+      border-color: rgba(249, 115, 22, 0.9);
+      color: #ffedd5;
+    }
+
+    .arch-flow-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+      text-align: center;
+      margin: 10px 0 12px;
+      position: relative;
+    }
+
+    .arch-flow-label::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -6px;
+      width: 60px;
+      height: 1.5px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.9), transparent);
+      opacity: 0.9;
+      animation: arch-flow-pulse 1600ms ease-out infinite;
+    }
+
+    .arch-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-soft);
+      margin: 10px 0 6px;
+    }
+
+    .arch-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    @keyframes arch-shell-in {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.97);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1.005);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes arch-col-in {
+      0% {
+        opacity: 0;
+        transform: translateY(26px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes arch-node-pop {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes arch-flow-pulse {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) scaleX(0.4);
+      }
+      50% {
+        opacity: 1;
+        transform: translateX(-50%) scaleX(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) scaleX(1.2);
+      }
+    }
+
+    @keyframes arch-orb-breathe {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.55;
+      }
+      100% {
+        transform: translate3d(6px, -6px, 0) scale(1.08);
+        opacity: 0.95;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      body {
+        padding: 18px;
+        align-items: stretch;
+      }
+
+      .arch-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .architecture-shell {
+        padding: 18px 16px;
+      }
+
+      .arch-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="architecture-shell">
+      <!-- Header -->
+      <div class="arch-header">
+        <div class="arch-title-block">
+          <div class="arch-title">
+            Hospital Agent Orchestration
+            <span class="arch-title-pill">Production architecture</span>
+          </div>
+          <div class="arch-subtitle">
+            Multi‑agent hospital coordinator built on Google ADK, Gemini models, and shared clinical tools for triage, diagnostics, and routing across 35 specialist departments.
+          </div>
+        </div>
+        <div class="arch-legend">
+          <span class="arch-tag">
+            <span class="arch-tag-dot common"></span> Common tools
+          </span>
+          <span class="arch-tag">
+            <span class="arch-tag-dot.special"></span> Specialty tools
+          </span>
+          <span class="arch-tag">
+            <span class="arch-tag-dot image"></span> Imaging agents
+          </span>
+          <span class="arch-tag">
+            <span class="arch-tag-dot web"></span> Web search
+          </span>
+        </div>
+      </div>
+
+      <!-- Flow label -->
+      <div class="arch-flow-label">
+        Patient request → Coordinator → Specialist department agents
+      </div>
+
+      <!-- Main grid -->
+      <div class="arch-grid">
+        <!-- Left: Patient / Entry -->
+        <div class="arch-column">
+          <div class="arch-col-header">
+            <div class="arch-col-title">Patient entry</div>
+          </div>
+
+          <div class="arch-node main">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">👤</div>
+              <div>
+                <div class="arch-node-title">Patient</div>
+                <div class="arch-node-meta">Symptoms, history, attachments, identifiers</div>
+              </div>
+            </div>
+            <div class="arch-badge-row">
+              <span class="arch-badge accent">Request Flow</span>
+              <span class="arch-badge">Patient IDs P001–P010</span>
+            </div>
+          </div>
+
+          <div class="arch-section-title">Requests</div>
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">📝</div>
+              <div>
+                <div class="arch-node-title">Triage questionnaire</div>
+                <div class="arch-node-meta">Structured symptoms, vitals, timeline</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🖼️</div>
+              <div>
+                <div class="arch-node-title">Clinical attachments</div>
+                <div class="arch-node-meta">Imaging, lab PDFs, previous discharge summaries</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Root agent / Coordinator -->
+        <div class="arch-column primary">
+          <div class="arch-col-header">
+            <div>
+              <div class="arch-col-title">Root agent</div>
+              <div class="arch-col-subtitle">Main hospital coordinator & router</div>
+            </div>
+            <div class="arch-badge accent">hospital_coordinator</div>
+          </div>
+
+          <div class="arch-node main">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🏥</div>
+              <div>
+                <div class="arch-node-title">hospital_coordinator</div>
+                <div class="arch-node-meta">
+                  Triage, routing, orchestration across 35 specialist department agents
+                </div>
+              </div>
+            </div>
+            <div class="arch-badge-row">
+              <span class="arch-badge">Root Agent</span>
+              <span class="arch-badge">Google ADK</span>
+              <span class="arch-badge">Multi‑agent router</span>
+            </div>
+            <div class="arch-tools">
+              <span class="arch-tool-pill.common">⚕️ triage_assessment</span>
+              <span class="arch-tool-pill.image">🖼️ analyze_medical_image</span>
+              <span class="arch-tool-pill.web">🌐 web_search</span>
+            </div>
+            <div class="arch-badge-row" style="margin-top:8px;">
+              <span class="arch-badge accent">Model: openrouter/google/gemini-2.5-flash-lite</span>
+            </div>
+          </div>
+
+          <div class="arch-section-title">Routing</div>
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🧭</div>
+              <div>
+                <div class="arch-node-title">Department selection</div>
+                <div class="arch-node-meta">
+                  Routes to cardiology_agent, neurology_agent, pulmonology_agent + 32 more agents
+                </div>
+              </div>
+            </div>
+            <div class="arch-badge-row">
+              <span class="arch-badge">Medical specialties</span>
+              <span class="arch-badge">Surgical specialties</span>
+              <span class="arch-badge">Diagnostic / therapeutic</span>
+              <span class="arch-badge">Emergency</span>
+            </div>
+          </div>
+
+          <div class="arch-section-title">Coordinator tools</div>
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🛠️</div>
+              <div>
+                <div class="arch-node-title">Coordinator tools</div>
+                <div class="arch-node-meta">Used by hospital_coordinator for triage and routing</div>
+              </div>
+            </div>
+            <div class="arch-tools">
+              <span class="arch-tool-pill.common">⚕️ triage_assessment</span>
+              <span class="arch-tool-pill.image">🖼️ analyze_medical_image (11 imaging departments)</span>
+              <span class="arch-tool-pill.web">🌐 web_search</span>
+            </div>
+          </div>
+
+          <div class="arch-section-title">Infrastructure</div>
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🧩</div>
+              <div>
+                <div class="arch-node-title">Runtime stack</div>
+                <div class="arch-node-meta">
+                  Google ADK framework, Gemini‑2.5‑flash‑lite coordinator, Gemini‑2.0‑flash department agents, browser‑use + Chromium for web
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Department agents -->
+        <div class="arch-column">
+          <div class="arch-col-header">
+            <div>
+              <div class="arch-col-title">Department agents</div>
+              <div class="arch-col-subtitle">35 specialist autonomous agents</div>
+            </div>
+          </div>
+
+          <div class="arch-node main">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🤖</div>
+              <div>
+                <div class="arch-node-title">Department Agents</div>
+                <div class="arch-node-meta">
+                  Each agent uses 7 common tools + 2 specialty tools
+                </div>
+              </div>
+            </div>
+            <div class="arch-badge-row">
+              <span class="arch-badge accent">Model: gemini-2.0-flash</span>
+              <span class="arch-badge">35 departments</span>
+            </div>
+          </div>
+
+          <div class="arch-section-title">Medical specialties</div>
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🫀</div>
+              <div>
+                <div class="arch-node-title">cardiology_agent</div>
+                <div class="arch-node-meta">Heart‑related triage, diagnostics, and treatment planning</div>
+              </div>
+            </div>
+            <div class="arch-tools">
+              <span class="arch-tool-pill.common">🔵 get_patient_info</span>
+              <span class="arch-tool-pill.common">🔵 record_vitals</span>
+              <span class="arch-tool-pill.common">🔵 check_drug_interactions</span>
+              <span class="arch-tool-pill.common">🔵 schedule_appointment</span>
+              <span class="arch-tool-pill.common">🔵 get_lab_results</span>
+              <span class="arch-tool-pill.common">🔵 generate_soap_note</span>
+              <span class="arch-tool-pill.common">🔵 calculate_medication_dose</span>
+              <span class="arch-tool-pill.special">🟢 cardiology_special_tools</span>
+            </div>
+          </div>
+
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🧠</div>
+              <div>
+                <div class="arch-node-title">neurology_agent</div>
+                <div class="arch-node-meta">Neurological assessments and follow‑up plans</div>
+              </div>
+            </div>
+            <div class="arch-tools">
+              <span class="arch-tool-pill.common">🔵 Common tools</span>
+              <span class="arch-tool-pill.special">🟢 neurology_special_tools</span>
+              <span class="arch-tool-pill.image">🖼️ analyze_medical_image</span>
+            </div>
+          </div>
+
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">🫁</div>
+              <div>
+                <div class="arch-node-title">pulmonology_agent</div>
+                <div class="arch-node-meta">Respiratory triage, imaging, and therapy suggestions</div>
+              </div>
+            </div>
+            <div class="arch-tools">
+              <span class="arch-tool-pill.common">🔵 Common tools</span>
+              <span class="arch-tool-pill.special">🟢 pulmonology_special_tools</span>
+              <span class="arch-tool-pill.image">🖼️ analyze_medical_image</span>
+            </div>
+          </div>
+
+          <div class="arch-section-title">Additional departments</div>
+          <div class="arch-node">
+            <div class="arch-node-header">
+              <div class="arch-node-icon">➕</div>
+              <div>
+                <div class="arch-node-title">+ 32 more agents</div>
+                <div class="arch-node-meta">
+                  allergy_immunology_agent, anesthesiology_agent, emergency_agent, radiology_agent, oncology_agent, and others
+                </div>
+              </div>
+            </div>
+            <div class="arch-badge-row">
+              <span class="arch-badge">Medical & surgical</span>
+              <span class="arch-badge">Diagnostic / therapeutic</span>
+              <span class="arch-badge">Emergency</span>
+            </div>
+            <div class="arch-tools">
+              <span class="arch-tool-pill.common">🔵 7 common tools</span>
+              <span class="arch-tool-pill.special">🟢 2 specialty tools / agent</span>
+              <span class="arch-tool-pill.image">🖼️ Imaging where applicable</span>
+              <span class="arch-tool-pill.web">🌐 Web search (select agents)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
