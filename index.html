@@ -343,11 +343,11 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
         </div>
         <div class="hero-meta">
           <div class="hero-stat">
-            <span class="hero-stat-num counter" data-to="35">0</span>
+            <span class="hero-stat-num counter" data-to="40">0</span>
             <span class="hero-stat-label">Specialist Agents</span>
           </div>
           <div class="hero-stat">
-            <span class="hero-stat-num counter" data-to="70">0</span>
+            <span class="hero-stat-num counter" data-to="101">0</span>
             <span class="hero-stat-label">Clinical Tools</span>
           </div>
           <div class="hero-stat">
@@ -404,26 +404,95 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
   <div class="wrap">
     <div class="stats-grid">
       <div class="stat-item reveal">
-        <div class="stat-num"><span class="counter" data-to="35">0</span></div>
-        <div class="stat-label">Specialist Departments</div>
+        <div class="stat-num"><span class="counter" data-to="40">0</span></div>
+        <div class="stat-label">AI Agents</div>
       </div>
       <div class="stat-item reveal reveal-delay-1">
-        <div class="stat-num"><span class="counter" data-to="70">0</span>+</div>
+        <div class="stat-num"><span class="counter" data-to="101">0</span>+</div>
         <div class="stat-label">Clinical Tools</div>
       </div>
       <div class="stat-item reveal reveal-delay-2">
         <div class="stat-num"><span class="counter" data-to="5">0</span></div>
-        <div class="stat-label">Urgency Levels (ESI)</div>
+        <div class="stat-label">ESI Triage Levels</div>
       </div>
       <div class="stat-item reveal reveal-delay-3">
-        <div class="stat-num">0ms</div>
-        <div class="stat-label">Routing Latency</div>
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">Continuous Operation</div>
       </div>
     </div>
   </div>
 </div>
 
 <div class="divider" style="max-width:var(--max);"></div>
+
+<!-- OPERATIONAL AGENTS -->
+<section id="operations" style="background:var(--bg2);padding:80px 0;">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <div class="section-label">Operational Excellence</div>
+      <h2 class="section-title">Specialized Agents for Hospital Operations</h2>
+      <p class="section-sub">Beyond clinical departments — intelligent agents for triage, pharmacy, discharge, and bed management</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:40px">
+      <!-- Triage Nurse -->
+      <div class="tech-card reveal" style="border-left:4px solid #16a34a">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#16a34a,#22c55e);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">🏥</div>
+          <div>
+            <div style="font-weight:700;font-size:18px">Triage Nurse Agent</div>
+            <div style="font-size:12px;color:var(--green);font-weight:600">ESI v4 Triage System</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px">
+          Performs Emergency Severity Index (ESI) v4 triage scoring — the gold standard for emergency department prioritization. Calculates acuity levels 1-5, assigns waiting priority, and manages the patient queue.
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="background:#dcfce7;color:#166534;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">calculate_esi_score()</span>
+          <span style="background:#dcfce7;color:#166534;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">record_nurse_triage()</span>
+          <span style="background:#dcfce7;color:#166534;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">assign_waiting_priority()</span>
+        </div>
+      </div>
+      <!-- Pharmacy -->
+      <div class="tech-card reveal reveal-delay-1" style="border-left:4px solid #7c3aed">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">💊</div>
+          <div>
+            <div style="font-weight:700;font-size:18px">Pharmacy Agent</div>
+            <div style="font-size:12px;color:#a855f7;font-weight:600">Medication Safety</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px">
+          Clinical pharmacist agent for medication verification, dispensing, and reconciliation. Validates against formulary, checks allergies, screens for drug interactions, and generates TTA prescriptions.
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="background:#f3e8ff;color:#6b21a8;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">verify_medication_order()</span>
+          <span style="background:#f3e8ff;color:#6b21a8;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">dispense_medication()</span>
+          <span style="background:#f3e8ff;color:#6b21a8;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">medication_reconciliation()</span>
+          <span style="background:#f3e8ff;color:#6b21a8;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">generate_tta_prescription()</span>
+        </div>
+      </div>
+      <!-- Discharge Planning -->
+      <div class="tech-card reveal reveal-delay-2" style="border-left:4px solid #0284c7">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#0284c7,#0ea5e9);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px">📋</div>
+          <div>
+            <div style="font-weight:700;font-size:18px">Discharge Planning</div>
+            <div style="font-size:12px;color:#0284c7;font-weight:600">Care Continuation</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px">
+          Manages the complete discharge workflow — assesses readiness, generates discharge summaries, sends GP letters, and arranges community services (PT, OT, district nursing).
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <span style="background:#e0f2fe;color:#0369a1;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">check_discharge_criteria()</span>
+          <span style="background:#e0f2fe;color:#0369a1;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">generate_discharge_summary()</span>
+          <span style="background:#e0f2fe;color:#0369a1;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">send_gp_letter()</span>
+          <span style="background:#e0f2fe;color:#0369a1;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">arrange_community_services()</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- HOW IT WORKS -->
 <section id="how-it-works">
@@ -598,7 +667,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
       <div class="tech-card reveal reveal-delay-1">
         <div class="tech-card-icon">✨</div>
         <div class="tech-card-title">Gemini 2.0 Flash</div>
-        <div class="tech-card-body">All 35 specialist agents and the root coordinator run on Gemini 2.0 Flash — delivering 1M token context, multimodal vision, and lightning-fast inference for real-time clinical use.</div>
+        <div class="tech-card-body">All 40 specialist agents and the root coordinator run on Gemini 2.0 Flash — delivering 1M token context, multimodal vision, and lightning-fast inference for real-time clinical use.</div>
         <span class="tech-tag">gemini-2.0-flash</span>
         <span class="tech-tag">multimodal</span>
       </div>
@@ -619,14 +688,14 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
       <div class="tech-card reveal reveal-delay-1">
         <div class="tech-card-icon">🐍</div>
         <div class="tech-card-title">Python Tool Ecosystem</div>
-        <div class="tech-card-body">70+ synchronous clinical tool functions covering vitals recording, lab retrieval, SOAP note generation, medication dosing, appointment scheduling, and specialty diagnostics.</div>
+        <div class="tech-card-body">101+ synchronous clinical tool functions covering vitals recording, lab retrieval, SOAP note generation, medication dosing, triage scoring, pharmacy verification, and discharge planning.</div>
         <span class="tech-tag">python-dotenv</span>
         <span class="tech-tag">langchain</span>
       </div>
       <div class="tech-card reveal reveal-delay-2">
         <div class="tech-card-icon">🗄️</div>
         <div class="tech-card-title">Clinical Data Layer</div>
-        <div class="tech-card-body">10 detailed mock patient profiles (P001–P010) with complete labs, medications, allergies, and histories. In-memory drug interaction and dosing databases for instant lookups.</div>
+        <div class="tech-card-body">10 detailed mock patient profiles (P001–P010) with complete labs, medications, allergies, and histories. In-memory drug interaction database for instant lookups.</div>
         <span class="tech-tag">in-memory DB</span>
         <span class="tech-tag">mock EHR</span>
       </div>
@@ -637,51 +706,103 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:60px 0 3
 <div class="divider" style="max-width:var(--max);margin:0 auto;"></div>
 
 <!-- ARCHITECTURE -->
-<section id="architecture" class="arch-section">
+<section id="architecture" style="padding:100px 0;background:var(--bg);">
   <div class="wrap">
     <div class="section-head center reveal">
       <div class="section-label">System Architecture</div>
-      <h2 class="section-title">One coordinator, 35 specialists</h2>
-      <p class="section-sub">The hospital_coordinator agent sits at the root of the tree. All patient interactions flow through it before being routed to the appropriate specialist.</p>
+      <h2 class="section-title">Hierarchical Multi-Agent Framework</h2>
+      <p class="section-sub">A root coordinator orchestrates 40 specialized AI agents through a 4-phase clinical workflow</p>
     </div>
-    <div class="arch-box reveal">
-      <div class="arch-tree">
-        <div class="arch-root">
-          🏥 hospital_coordinator
-          <div class="arch-root-sub">Root Agent · Triage · Routing · Gemini 2.0 Flash</div>
+    
+    <!-- Architecture Diagram -->
+    <div style="margin-top:60px">
+      <!-- Layer 1: Coordinator -->
+      <div style="display:flex;justify-content:center;margin-bottom:20px">
+        <div class="reveal" style="background:linear-gradient(135deg,#1e3a5f,#2d5a87);color:#fff;padding:20px 40px;border-radius:16px;box-shadow:0 8px 32px rgba(30,58,95,0.3);text-align:center">
+          <div style="font-size:24px;margin-bottom:8px">🏥</div>
+          <div style="font-weight:700;font-size:18px">hospital_coordinator</div>
+          <div style="font-size:12px;opacity:0.8;margin-top:4px">Root Agent • Gemini 2.0 Flash</div>
         </div>
-        <div class="arch-connector"></div>
-        <div class="arch-row" id="arch-dept-row"></div>
-        <div class="arch-tools">
-          <!-- Core Tools -->
-          <div class="arch-tool">triage_assessment()</div>
-          <div class="arch-tool">analyze_medical_image()</div>
-          <div class="arch-tool">web_search()</div>
-          <div class="arch-tool">get_patient_info()</div>
-          <div class="arch-tool">record_vitals()</div>
-          <div class="arch-tool">check_drug_interactions()</div>
-          <div class="arch-tool">get_lab_results()</div>
-          <div class="arch-tool">generate_soap_note()</div>
-          <div class="arch-tool">calculate_medication_dose()</div>
-          <div class="arch-tool">schedule_appointment()</div>
-          <!-- Sprint 1: Triage -->
-          <div class="arch-tool" style="background:var(--green)">calculate_esi_score()</div>
-          <div class="arch-tool" style="background:var(--green)">record_nurse_triage()</div>
-          <div class="arch-tool" style="background:var(--green)">assign_waiting_priority()</div>
-          <!-- Sprint 2: Pharmacy -->
-          <div class="arch-tool" style="background:var(--purple)">verify_medication_order()</div>
-          <div class="arch-tool" style="background:var(--purple)">dispense_medication()</div>
-          <div class="arch-tool" style="background:var(--purple)">medication_reconciliation()</div>
-          <div class="arch-tool" style="background:var(--purple)">generate_tta_prescription()</div>
-          <!-- Sprint 3: Discharge -->
-          <div class="arch-tool" style="background:var(--cyan)">check_discharge_criteria()</div>
-          <div class="arch-tool" style="background:var(--cyan)">generate_discharge_summary()</div>
-          <div class="arch-tool" style="background:var(--cyan)">send_gp_letter()</div>
-          <div class="arch-tool" style="background:var(--cyan)">arrange_community_services()</div>
-          <!-- Sprint 4: Diagnostic -->
-          <div class="arch-tool" style="background:var(--amber)">order_investigation()</div>
-          <div class="arch-tool" style="background:var(--amber)">get_pending_results()</div>
-          <div class="arch-tool" style="background:var(--amber)">acknowledge_critical_result()</div>
+      </div>
+      
+      <!-- Phase Flow -->
+      <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:30px;flex-wrap:wrap" class="reveal">
+        <div style="background:var(--bg2);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)">Phase 1: Registration</div>
+        <div style="color:var(--border)">→</div>
+        <div style="background:#dcfce7;color:#166534;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600">Phase 2: Triage</div>
+        <div style="color:var(--border)">→</div>
+        <div style="background:#dbeafe;color:#1e40af;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600">Phase 3: Specialist</div>
+        <div style="color:var(--border)">→</div>
+        <div style="background:#f3e8ff;color:#6b21a8;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600">Phase 4: Pharmacy</div>
+      </div>
+      
+      <!-- Agent Categories -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:40px">
+        <!-- Triage -->
+        <div class="reveal" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;text-align:center">
+          <div style="width:48px;height:48px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px">🏥</div>
+          <div style="font-weight:700;color:#166534;margin-bottom:4px">Triage Nurse</div>
+          <div style="font-size:12px;color:#15803d">ESI v4 Scoring</div>
+          <div style="font-size:11px;color:#166534;margin-top:8px;padding-top:8px;border-top:1px solid #bbf7d0">3 Functions</div>
+        </div>
+        
+        <!-- Medical -->
+        <div class="reveal reveal-delay-1" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;text-align:center">
+          <div style="width:48px;height:48px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px">🩺</div>
+          <div style="font-weight:700;color:#1d4ed8;margin-bottom:4px">Medical Specialties</div>
+          <div style="font-size:12px;color:#3b82f6">15 Departments</div>
+          <div style="font-size:11px;color:#1d4ed8;margin-top:8px;padding-top:8px;border-top:1px solid #bfdbfe">30 Functions</div>
+        </div>
+        
+        <!-- Surgical -->
+        <div class="reveal reveal-delay-2" style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px;text-align:center">
+          <div style="width:48px;height:48px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px">🔬</div>
+          <div style="font-weight:700;color:#b91c1c;margin-bottom:4px">Surgical Specialties</div>
+          <div style="font-size:12px;color:#ef4444">9 Departments</div>
+          <div style="font-size:11px;color:#b91c1c;margin-top:8px;padding-top:8px;border-top:1px solid #fecaca">18 Functions</div>
+        </div>
+        
+        <!-- Pharmacy -->
+        <div class="reveal reveal-delay-3" style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:20px;text-align:center">
+          <div style="width:48px;height:48px;background:#9333ea;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px">💊</div>
+          <div style="font-weight:700;color:#7e22ce;margin-bottom:4px">Pharmacy</div>
+          <div style="font-size:12px;color:#a855f7">Medication Safety</div>
+          <div style="font-size:11px;color:#7e22ce;margin-top:8px;padding-top:8px;border-top:1px solid #e9d5ff">4 Functions</div>
+        </div>
+        
+        <!-- Diagnostic -->
+        <div class="reveal reveal-delay-4" style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:20px;text-align:center">
+          <div style="width:48px;height:48px;background:#d97706;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px">📊</div>
+          <div style="font-weight:700;color:#b45309;margin-bottom:4px">Diagnostic</div>
+          <div style="font-size:12px;color:#f59e0b">11 Departments</div>
+          <div style="font-size:11px;color:#b45309;margin-top:8px;padding-top:8px;border-top:1px solid #fde68a">22 Functions</div>
+        </div>
+        
+        <!-- Discharge -->
+        <div class="reveal reveal-delay-5" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:20px;text-align:center">
+          <div style="width:48px;height:48px;background:#0891b2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px">📋</div>
+          <div style="font-weight:700;color:#0e7490;margin-bottom:4px">Discharge Planning</div>
+          <div style="font-size:12px;color:#06b6d4">Care Continuation</div>
+          <div style="font-size:11px;color:#0e7490;margin-top:8px;padding-top:8px;border-top:1px solid #bae6fd">4 Functions</div>
+        </div>
+      </div>
+      
+      <!-- Tools Summary -->
+      <div style="margin-top:50px;background:var(--bg2);border-radius:16px;padding:30px" class="reveal">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-weight:700;font-size:18px;color:var(--text)">Tool Layer — 101 Clinical Functions</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px">Shared across all agents for patient data, vitals, labs, imaging, and documentation</div>
+        </div>
+        <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:8px">
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">get_patient_info()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">record_vitals()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">get_lab_results()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">analyze_medical_image()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">web_search()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">check_drug_interactions()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">generate_soap_note()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">order_investigation()</span>
+          <span style="background:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--border)">+93 more...</span>
         </div>
       </div>
     </div>
