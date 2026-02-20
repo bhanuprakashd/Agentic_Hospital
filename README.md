@@ -1,4 +1,4 @@
-# Agentic Hospital — Current Implementation Report
+# Agentic Hospital
 
 **Date:** 2026-02-20
 **Framework:** Google ADK (Agent Development Kit)
